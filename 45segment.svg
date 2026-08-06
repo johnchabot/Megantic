@@ -1,108 +1,130 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://w3.org" viewBox="0 0 620 540" width="100%" height="100%">
+
   <style>
-    /* ==================== CENTRALIZED HARDWARE PALETTE ==================== */
+
     :root {
-      --bg-color:     #2a2e2f;  /* Matte Instrument Grey Chassis Canvas */
-      --grid-color:   #4b5354;  /* Muted Mid-Grey Trace network Mesh */
-      --seg-off:      #141617;  /* Deep Charcoal Physical Mask Shards */
-      --seg-on:       #ffa500;  /* High-Intensity Active Transit Amber */
-      --chassis-rim:  #0d0e0f;  /* Solid Module Housing Frame Outer Rim */
+      --bg-color:     #2a2e2f;  /* Matte Instrument Grey Chassis Base */
+      --grid-color:   #2a2e2f;  /* Strong Rectangular Mask Cutters (Matches Canvas) */
+      --seg-off:      #141617;  /* Deep Charcoal Inactive Matrix Facets */
+      --seg-on:       #ffa500;  /* High-Intensity Active Transit Amber Glow */
+      --chassis-rim:  #0d0e0f;  /* Solid Outer Housing Module Frame Rim */
     }
 
-    /* ==================== CORE STRUCTURAL STYLES ==================== */
     svg { background: var(--bg-color); }
     .bg-shield { fill: var(--seg-off); stroke: var(--chassis-rim); stroke-width: 3; }
     
-    /* Centralized Grid and Mask Slices */
-    .trace-line { fill: none; stroke: var(--grid-color); stroke-width: 1.2; stroke-dasharray: 2,3; }
-    .trace-axis { fill: none; stroke: var(--grid-color); stroke-width: 1.8; }
-    .mask-blade { fill: none; stroke: var(--bg-color); stroke-width: 3; }
+    /* Strong Mechanical Mask Grid Overlays (The Slicing Blades) */
+    .mask-blade { fill: none; stroke: var(--grid-color); stroke-width: 3; }
+    .mask-axis  { fill: none; stroke: var(--grid-color); stroke-width: 4; }
 
-    /* ==================== ADDRESSABLE HARDWARE SEGMENTS ==================== */
-    /* Base Loop/Block Properties */
-    .seg-block-off { fill: var(--seg-off); stroke: var(--bg-color); stroke-width: 1.5; cursor: pointer; transition: fill 0.1s ease; }
-    .seg-block-on  { fill: var(--seg-on);  stroke: #000000;         stroke-width: 1.5; cursor: pointer; filter: brightness(1.3) drop-shadow(0px 0px 6px rgba(255,165,0,0.9)); }
+    /* ==================== INACTIVE STATE HOUSING FACETS ==================== */
+    .block-off  { fill: var(--seg-off); stroke: var(--grid-color); stroke-width: 1.5; cursor: pointer; transition: fill 0.1s ease; }
+    .swoosh-off { fill: none; stroke: var(--seg-off); stroke-width: 30; stroke-linecap: round; cursor: pointer; transition: stroke 0.1s ease; }
 
-    /* Base Swoosh Spline Properties */
-    .seg-swoosh-off { fill: none; stroke: var(--seg-off); stroke-width: 30; stroke-linecap: round; cursor: pointer; transition: stroke 0.1s ease; }
-    .seg-swoosh-on  { fill: none; stroke: var(--seg-on);  stroke-width: 26; stroke-linecap: round; cursor: pointer; filter: brightness(1.3) drop-shadow(0px 0px 6px rgba(255,165,0,0.9)); }
+    /* ==================== ACTIVE HIGH-INTENSITY EMISSION PRINT ==================== */
+    .block-on   { fill: var(--seg-on);  stroke: #000000;         stroke-width: 1.5; cursor: pointer; filter: brightness(1.3) drop-shadow(0px 0px 6px rgba(255,165,0,0.9)); }
+    .swoosh-on  { fill: none; stroke: var(--seg-on);  stroke-width: 26; stroke-linecap: round; cursor: pointer; filter: brightness(1.3) drop-shadow(0px 0px 6px rgba(255,165,0,0.9)); }
 
-    /* ==================== INTERACTIVE HOVER OVERRIDES ==================== */
-    .seg-block-off:hover  { fill: var(--seg-on);  stroke: #000000; filter: brightness(1.2); }
-    .seg-swoosh-off:hover { stroke: var(--seg-on); filter: brightness(1.2); }
+    /* ==================== INTERACTIVE MOUSEOVER ACTIVATION ==================== */
+    .block-off:hover  { fill: var(--seg-on);  stroke: #000000; filter: brightness(1.2); }
+    .swoosh-off:hover { stroke: var(--seg-on); filter: brightness(1.2); }
   </style>
+
   <defs>
-    <path id="orange-loop" d="M 0,180 L 0,90 C 0,10 20,-15 90,-15 L 90,15 C 45,15 30,45 30,90 L 30,180 Z"></path>
-    <path id="mies-swoosh" d="M 0,-15 C 30,-15 50,30 90,30 C 130,30 140,135 90,195 C 40,255 50,360 90,360 C 130,360 150,375 180,375"></path>
+    <!-- 
+      MASTER PATH 1: THE RIGID HOLLOW ORANGE ENCLOSURE
+      Features both inner and outer curve boundaries that meet flatly at Row 6.5,
+      forming a perfectly uniform 30px-wide loop face profile.
+    -->
+    <path id="master-orange-hollow-loop" d="M 0,180 L 0,90 C 0,30 36,-15 90,-15 L 90,15 C 54,15 30,50 30,90 L 30,180 Z M 54,120 A 24,24 0 0,0 90,75 L 90,45 A 54,54 0 0,1 36,90 Z" />
+
+    <!-- 
+      MASTER PATH 2: THE EXPANSIVE RELAXED MIES DOUBLE-HELIX SWOOSH
+      A continuous serpentine wave optimized to hit your 3 convergence nodes
+      at Row 0.5 (15px), Row 6.5 (180px), and Row 11.5 (345px).
+    -->
+    <path id="master-mies-wavy-helix" d="M 0,-15 C 30,-15 50,30 90,30 C 130,30 140,135 90,180 C 40,225 50,330 90,330 C 130,330 150,375 180,375" />
+
+    <!-- REUSABLE INTEGRATED CHASSIS MODULE PLATE -->
     <g id="chassis-backing-panel">
-      <rect x="0" y="-15" width="180" height="390" class="bg-shield"></rect>
-      <line x1="18" y1="-15" x2="18" y2="375" class="trace-line"></line>
-      <line x1="36" y1="-15" x2="36" y2="375" class="trace-line"></line>
-      <line x1="54" y1="-15" x2="54" y2="375" class="trace-line"></line>
-      <line x1="72" y1="-15" x2="72" y2="375" class="trace-line"></line>
-      <line x1="90" y1="-15" x2="90" y2="375" class="trace-axis"></line>
-      <line x1="108" y1="-15" x2="108" y2="375" class="trace-line"></line>
-      <line x1="126" y1="-15" x2="126" y2="375" class="trace-line"></line>
-      <line x1="144" y1="-15" x2="144" y2="375" class="trace-line"></line>
-      <line x1="162" y1="-15" x2="162" y2="375" class="trace-line"></line>
-      <line x1="0" y1="0" x2="180" y2="0" class="trace-line"></line>
-      <line x1="0" y1="30" x2="180" y2="30" class="trace-line"></line>
-      <line x1="0" y1="60" x2="180" y2="60" class="trace-line"></line>
-      <line x1="0" y1="90" x2="180" y2="90" class="trace-line"></line>
-      <line x1="0" y1="120" x2="180" y2="120" class="trace-line"></line>
-      <line x1="0" y1="150" x2="180" y2="150" class="trace-line"></line>
-      <line x1="0" y1="180" x2="180" y2="180" class="trace-axis"></line>
-      <line x1="0" y1="210" x2="180" y2="210" class="trace-line"></line>
-      <line x1="0" y1="240" x2="180" y2="240" class="trace-line"></line>
-      <line x1="0" y1="270" x2="180" y2="270" class="trace-line"></line>
-      <line x1="0" y1="300" x2="180" y2="300" class="trace-line"></line>
-      <line x1="0" y1="330" x2="180" y2="330" class="trace-line"></line>
-      <line x1="0" y1="360" x2="180" y2="360" class="trace-line"></line>
+      <rect x="0" y="-15" width="180" height="390" class="bg-shield" />
     </g>
-    <g id="mechanical-slice-mask">
-      <line x1="0" y1="30" x2="180" y2="30" class="mask-blade"></line>
-      <line x1="0" y1="60" x2="180" y2="60" class="mask-blade"></line>
-      <line x1="0" y1="90" x2="180" y2="90" class="mask-blade"></line>
-      <line x1="0" y1="120" x2="180" y2="120" class="mask-blade"></line>
-      <line x1="0" y1="150" x2="180" y2="150" class="mask-blade"></line>
-      <line x1="0" y1="210" x2="180" y2="210" class="mask-blade"></line>
-      <line x1="0" y1="240" x2="180" y2="240" class="mask-blade"></line>
-      <line x1="0" y1="270" x2="180" y2="270" class="mask-blade"></line>
-      <line x1="0" y1="300" x2="180" y2="300" class="mask-blade"></line>
-      <line x1="0" y1="330" x2="180" y2="330" class="mask-blade"></line>
-      <line x1="18" y1="0" x2="18" y2="360" class="mask-blade"></line>
-      <line x1="54" y1="0" x2="54" y2="360" class="mask-blade"></line>
-      <line x1="126" y1="0" x2="126" y2="360" class="mask-blade"></line>
-      <line x1="162" y1="0" x2="162" y2="360" class="mask-blade"></line>
+
+    <!-- THE STRONG RECTANGULAR GRID MASK (Slices everything from the top layer) -->
+    <g id="strong-rectangular-grid-mask">
+      <!-- The 1/2 Half-Row Slices (Attic Ceiling and Basement Floor Lines) -->
+      <line x1="0" y1="-15" x2="180" y2="-15" class="mask-axis" />
+      <line x1="0" y1="375" x2="180" y2="375" class="mask-axis" />
+      <!-- The 12-Row Standard Slices -->
+      <line x1="0" y1="0"   x2="180" y2="0"   class="mask-blade" />
+      <line x1="0" y1="30"  x2="180" y2="30"  class="mask-blade" />
+      <line x1="0" y1="60"  x2="180" y2="60"  class="mask-blade" />
+      <line x1="0" y1="90"  x2="180" y2="90"  class="mask-blade" />
+      <line x1="0" y1="120" x2="180" y2="120" class="mask-blade" />
+      <line x1="0" y1="150" x2="180" y2="150" class="mask-blade" />
+      <line x1="0" y1="180" x2="180" y2="180" class="mask-axis" />  <!-- Central Split Line -->
+      <line x1="0" y1="210" x2="180" y2="210" class="mask-blade" />
+      <line x1="0" y1="240" x2="180" y2="240" class="mask-blade" />
+      <line x1="0" y1="270" x2="180" y2="270" class="mask-blade" />
+      <line x1="0" y1="300" x2="180" y2="300" class="mask-blade" />
+      <line x1="0" y1="330" x2="180" y2="330" class="mask-blade" />
+      <line x1="0" y1="360" x2="180" y2="360" class="mask-blade" />
+      <!-- The 10-Column Vertical Slices -->
+      <line x1="18" y1="0"  x2="18"  y2="360" class="mask-blade" />
+      <line x1="36" y1="0"  x2="36"  y2="360" class="mask-blade" />
+      <line x1="54" y1="0"  x2="54"  y2="360" class="mask-blade" />
+      <line x1="72" y1="0"  x2="72"  y2="360" class="mask-blade" />
+      <line x1="90" y1="0"  x2="90"  y2="360" class="mask-axis" />   <!-- Center Vertical Spine -->
+      <line x1="108" y1="0" x2="108" y2="360" class="mask-blade" />
+      <line x1="126" y1="0" x2="126" y2="360" class="mask-blade" />
+      <line x1="144" y1="0" x2="144" y2="360" class="mask-blade" />
+      <line x1="162" y1="0" x2="162" y2="360" class="mask-blade" />
     </g>
   </defs>
+
+  <!-- ==================== PANEL 1: INTERACTIVE TESTING CORE (LEFT) ==================== -->
   <g transform="translate(40, 70)">
-    <use href="#chassis-backing-panel"></use>
-    <g class="seg-swoosh-off">
-      <use href="#mies-swoosh"></use>
-      <use href="#mies-swoosh" transform="translate(180,0) scale(-1,1)"></use>
+    <use href="#chassis-backing-panel" />
+
+    <!-- Continuous Unlit Mies Helix Waves -->
+    <g class="swoosh-off">
+      <use href="#master-mies-wavy-helix" />
+      <use href="#master-mies-wavy-helix" transform="translate(180,0) scale(-1,1)" />
     </g>
-    <g class="seg-block-off">
-      <use href="#orange-loop"></use>
-      <use href="#orange-loop" transform="translate(180,0) scale(-1,1)"></use>
-      <use href="#orange-loop" transform="translate(0,390) scale(1,-1)"></use>
-      <use href="#orange-loop" transform="translate(180,390) scale(-1,-1)"></use>
+
+    <!-- Continuous Unlit Hollow Orange Loop Enclosures -->
+    <g class="block-off">
+      <!-- Upper Hollow Loops -->
+      <use href="#master-orange-hollow-loop" />
+      <use href="#master-orange-hollow-loop" transform="translate(180,0) scale(-1,1)" />
+      <!-- Lower Hollow Loops (Symmetrically flipped across the Row 6.5 midline split) -->
+      <use href="#master-orange-hollow-loop" transform="translate(0,360) scale(1,-1)" />
+      <use href="#master-orange-hollow-loop" transform="translate(180,360) scale(-1,-1)" />
     </g>
-    <use href="#mechanical-slice-mask"></use>
+
+    <!-- The Strong Grid sits on top of the paths, cutting them up cleanly -->
+    <use href="#strong-rectangular-grid-mask" />
   </g>
+
+  <!-- ==================== PANEL 2: ACTIVE GLYPH PRINT EXTRACTION (RIGHT) ==================== -->
   <g transform="translate(360, 70)">
-    <use href="#chassis-backing-panel"></use>
-    <g class="seg-swoosh-on">
-      <use href="#mies-swoosh"></use>
-      <use href="#mies-swoosh" transform="translate(180,0) scale(-1,1)"></use>
+    <use href="#chassis-backing-panel" />
+
+    <!-- Active High-Intensity Mies Helix Track (Engine 2) -->
+    <g class="swoosh-on">
+      <use href="#master-mies-wavy-helix" />
+      <use href="#master-mies-wavy-helix" transform="translate(180,0) scale(-1,1)" />
     </g>
-    <g class="seg-block-on">
-      <use href="#orange-loop"></use>
-      <use href="#orange-loop" transform="translate(180,0) scale(-1,1)"></use>
-      <use href="#orange-loop" transform="translate(0,390) scale(1,-1)"></use>
-      <use href="#orange-loop" transform="translate(180,390) scale(-1,-1)"></use>
+
+    <!-- Active Dominant Hollow Orange Tracks ("Orange Wins" Overlap Priority - Engine 1) -->
+    <g class="block-on">
+      <use href="#master-orange-hollow-loop" />
+      <use href="#master-orange-hollow-loop" transform="translate(180,0) scale(-1,1)" />
+      <use href="#master-orange-hollow-loop" transform="translate(0,360) scale(1,-1)" />
+      <use href="#master-orange-hollow-loop" transform="translate(180,360) scale(-1,-1)" />
     </g>
-    <use href="#mechanical-slice-mask"></use>
+
+    <!-- The Strong Grid sits on top of the paths, cutting them up cleanly -->
+    <use href="#strong-rectangular-grid-mask" />
   </g>
 </svg>
