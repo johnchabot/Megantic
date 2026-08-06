@@ -1,5 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://w3.org" viewBox="0 0 620 540" width="100%" height="100%">
-
   <style>
 
     :root {
@@ -29,102 +29,65 @@
     .block-off:hover  { fill: var(--seg-on);  stroke: #000000; filter: brightness(1.2); }
     .swoosh-off:hover { stroke: var(--seg-on); filter: brightness(1.2); }
   </style>
-
   <defs>
-    <!-- 
-      MASTER PATH 1: THE RIGID HOLLOW ORANGE ENCLOSURE
-      Features both inner and outer curve boundaries that meet flatly at Row 6.5,
-      forming a perfectly uniform 30px-wide loop face profile.
-    -->
-    <path id="master-orange-hollow-loop" d="M 0,180 L 0,90 C 0,30 36,-15 90,-15 L 90,15 C 54,15 30,50 30,90 L 30,180 Z M 54,120 A 24,24 0 0,0 90,75 L 90,45 A 54,54 0 0,1 36,90 Z" />
-
-    <!-- 
-      MASTER PATH 2: THE EXPANSIVE RELAXED MIES DOUBLE-HELIX SWOOSH
-      A continuous serpentine wave optimized to hit your 3 convergence nodes
-      at Row 0.5 (15px), Row 6.5 (180px), and Row 11.5 (345px).
-    -->
-    <path id="master-mies-wavy-helix" d="M 0,-15 C 30,-15 50,30 90,30 C 130,30 140,135 90,180 C 40,225 50,330 90,330 C 130,330 150,375 180,375" />
-
-    <!-- REUSABLE INTEGRATED CHASSIS MODULE PLATE -->
+    <path id="master-orange-hollow-loop" d="M 0,180 L 0,90 C 0,30 36,-15 90,-15 L 90,15 C 54,15 30,50 30,90 L 30,180 Z M 54,120 A 24,24 0 0,0 90,75 L 90,45 A 54,54 0 0,1 36,90 Z"></path>
+    <path id="master-mies-wavy-helix" d="M 0,-15 C 30,-15 50,30 90,30 C 130,30 140,135 90,180 C 40,225 50,330 90,330 C 130,330 150,375 180,375"></path>
     <g id="chassis-backing-panel">
-      <rect x="0" y="-15" width="180" height="390" class="bg-shield" />
+      <rect x="0" y="-15" width="180" height="390" class="bg-shield"></rect>
     </g>
-
-    <!-- THE STRONG RECTANGULAR GRID MASK (Slices everything from the top layer) -->
     <g id="strong-rectangular-grid-mask">
-      <!-- The 1/2 Half-Row Slices (Attic Ceiling and Basement Floor Lines) -->
-      <line x1="0" y1="-15" x2="180" y2="-15" class="mask-axis" />
-      <line x1="0" y1="375" x2="180" y2="375" class="mask-axis" />
-      <!-- The 12-Row Standard Slices -->
-      <line x1="0" y1="0"   x2="180" y2="0"   class="mask-blade" />
-      <line x1="0" y1="30"  x2="180" y2="30"  class="mask-blade" />
-      <line x1="0" y1="60"  x2="180" y2="60"  class="mask-blade" />
-      <line x1="0" y1="90"  x2="180" y2="90"  class="mask-blade" />
-      <line x1="0" y1="120" x2="180" y2="120" class="mask-blade" />
-      <line x1="0" y1="150" x2="180" y2="150" class="mask-blade" />
-      <line x1="0" y1="180" x2="180" y2="180" class="mask-axis" />  <!-- Central Split Line -->
-      <line x1="0" y1="210" x2="180" y2="210" class="mask-blade" />
-      <line x1="0" y1="240" x2="180" y2="240" class="mask-blade" />
-      <line x1="0" y1="270" x2="180" y2="270" class="mask-blade" />
-      <line x1="0" y1="300" x2="180" y2="300" class="mask-blade" />
-      <line x1="0" y1="330" x2="180" y2="330" class="mask-blade" />
-      <line x1="0" y1="360" x2="180" y2="360" class="mask-blade" />
-      <!-- The 10-Column Vertical Slices -->
-      <line x1="18" y1="0"  x2="18"  y2="360" class="mask-blade" />
-      <line x1="36" y1="0"  x2="36"  y2="360" class="mask-blade" />
-      <line x1="54" y1="0"  x2="54"  y2="360" class="mask-blade" />
-      <line x1="72" y1="0"  x2="72"  y2="360" class="mask-blade" />
-      <line x1="90" y1="0"  x2="90"  y2="360" class="mask-axis" />   <!-- Center Vertical Spine -->
-      <line x1="108" y1="0" x2="108" y2="360" class="mask-blade" />
-      <line x1="126" y1="0" x2="126" y2="360" class="mask-blade" />
-      <line x1="144" y1="0" x2="144" y2="360" class="mask-blade" />
-      <line x1="162" y1="0" x2="162" y2="360" class="mask-blade" />
+      <line x1="0" y1="-15" x2="180" y2="-15" class="mask-axis"></line>
+      <line x1="0" y1="375" x2="180" y2="375" class="mask-axis"></line>
+      <line x1="0" y1="0" x2="180" y2="0" class="mask-blade"></line>
+      <line x1="0" y1="30" x2="180" y2="30" class="mask-blade"></line>
+      <line x1="0" y1="60" x2="180" y2="60" class="mask-blade"></line>
+      <line x1="0" y1="90" x2="180" y2="90" class="mask-blade"></line>
+      <line x1="0" y1="120" x2="180" y2="120" class="mask-blade"></line>
+      <line x1="0" y1="150" x2="180" y2="150" class="mask-blade"></line>
+      <line x1="0" y1="180" x2="180" y2="180" class="mask-axis"></line>
+      <line x1="0" y1="210" x2="180" y2="210" class="mask-blade"></line>
+      <line x1="0" y1="240" x2="180" y2="240" class="mask-blade"></line>
+      <line x1="0" y1="270" x2="180" y2="270" class="mask-blade"></line>
+      <line x1="0" y1="300" x2="180" y2="300" class="mask-blade"></line>
+      <line x1="0" y1="330" x2="180" y2="330" class="mask-blade"></line>
+      <line x1="0" y1="360" x2="180" y2="360" class="mask-blade"></line>
+      <line x1="18" y1="0" x2="18" y2="360" class="mask-blade"></line>
+      <line x1="36" y1="0" x2="36" y2="360" class="mask-blade"></line>
+      <line x1="54" y1="0" x2="54" y2="360" class="mask-blade"></line>
+      <line x1="72" y1="0" x2="72" y2="360" class="mask-blade"></line>
+      <line x1="90" y1="0" x2="90" y2="360" class="mask-axis"></line>
+      <line x1="108" y1="0" x2="108" y2="360" class="mask-blade"></line>
+      <line x1="126" y1="0" x2="126" y2="360" class="mask-blade"></line>
+      <line x1="144" y1="0" x2="144" y2="360" class="mask-blade"></line>
+      <line x1="162" y1="0" x2="162" y2="360" class="mask-blade"></line>
     </g>
   </defs>
-
-  <!-- ==================== PANEL 1: INTERACTIVE TESTING CORE (LEFT) ==================== -->
   <g transform="translate(40, 70)">
-    <use href="#chassis-backing-panel" />
-
-    <!-- Continuous Unlit Mies Helix Waves -->
+    <use href="#chassis-backing-panel"></use>
     <g class="swoosh-off">
-      <use href="#master-mies-wavy-helix" />
-      <use href="#master-mies-wavy-helix" transform="translate(180,0) scale(-1,1)" />
+      <use href="#master-mies-wavy-helix"></use>
+      <use href="#master-mies-wavy-helix" transform="translate(180,0) scale(-1,1)"></use>
     </g>
-
-    <!-- Continuous Unlit Hollow Orange Loop Enclosures -->
     <g class="block-off">
-      <!-- Upper Hollow Loops -->
-      <use href="#master-orange-hollow-loop" />
-      <use href="#master-orange-hollow-loop" transform="translate(180,0) scale(-1,1)" />
-      <!-- Lower Hollow Loops (Symmetrically flipped across the Row 6.5 midline split) -->
-      <use href="#master-orange-hollow-loop" transform="translate(0,360) scale(1,-1)" />
-      <use href="#master-orange-hollow-loop" transform="translate(180,360) scale(-1,-1)" />
+      <use href="#master-orange-hollow-loop"></use>
+      <use href="#master-orange-hollow-loop" transform="translate(180,0) scale(-1,1)"></use>
+      <use href="#master-orange-hollow-loop" transform="translate(0,360) scale(1,-1)"></use>
+      <use href="#master-orange-hollow-loop" transform="translate(180,360) scale(-1,-1)"></use>
     </g>
-
-    <!-- The Strong Grid sits on top of the paths, cutting them up cleanly -->
-    <use href="#strong-rectangular-grid-mask" />
+    <use href="#strong-rectangular-grid-mask"></use>
   </g>
-
-  <!-- ==================== PANEL 2: ACTIVE GLYPH PRINT EXTRACTION (RIGHT) ==================== -->
   <g transform="translate(360, 70)">
-    <use href="#chassis-backing-panel" />
-
-    <!-- Active High-Intensity Mies Helix Track (Engine 2) -->
+    <use href="#chassis-backing-panel"></use>
     <g class="swoosh-on">
-      <use href="#master-mies-wavy-helix" />
-      <use href="#master-mies-wavy-helix" transform="translate(180,0) scale(-1,1)" />
+      <use href="#master-mies-wavy-helix"></use>
+      <use href="#master-mies-wavy-helix" transform="translate(180,0) scale(-1,1)"></use>
     </g>
-
-    <!-- Active Dominant Hollow Orange Tracks ("Orange Wins" Overlap Priority - Engine 1) -->
     <g class="block-on">
-      <use href="#master-orange-hollow-loop" />
-      <use href="#master-orange-hollow-loop" transform="translate(180,0) scale(-1,1)" />
-      <use href="#master-orange-hollow-loop" transform="translate(0,360) scale(1,-1)" />
-      <use href="#master-orange-hollow-loop" transform="translate(180,360) scale(-1,-1)" />
+      <use href="#master-orange-hollow-loop"></use>
+      <use href="#master-orange-hollow-loop" transform="translate(180,0) scale(-1,1)"></use>
+      <use href="#master-orange-hollow-loop" transform="translate(0,360) scale(1,-1)"></use>
+      <use href="#master-orange-hollow-loop" transform="translate(180,360) scale(-1,-1)"></use>
     </g>
-
-    <!-- The Strong Grid sits on top of the paths, cutting them up cleanly -->
-    <use href="#strong-rectangular-grid-mask" />
+    <use href="#strong-rectangular-grid-mask"></use>
   </g>
 </svg>
