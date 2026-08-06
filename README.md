@@ -1,11 +1,18 @@
 # Megantic
 
-Developed by a wannabe transit hardware developer from the late 1990s, but with modern geometric clarity.
+Structural Expressivist 45-Segment Addressable Display matrix
+Pan-Latin Heavy Transit Matrix
 
-45 Addressable Segment Display matrix resulting from two entirely different geometric engines that obey a strict Coincident Node Rule
-to engineer a typographic chassis.  
+acting as a typographic chassis
+
+Mashup of late-1990s ideas, with modern geometric clarity.
+
+
+
+ resulting from two entirely different geometric engines that obey a strict Coincident Node Rule
+
 It blends a legible character weight with the flexible context-shifting properties of a tactical multi-segment array (10 Columns × 12 Rows)
-Structural Expressivism (often summed up by Mies’ famous phrases "Less is more" and "God is in the details").
+(often summed up by Mies’ famous phrases "Less is more" and "God is in the details").
 
 The Symmetrical Wave FrequencyThis is a typographic triumph. 
 
@@ -54,7 +61,7 @@ Here is the sequential, step-by-step description of your custom display matrix a
 8. Enforce a strict "Orange Wins" layout priority rule where the orange loop paths sit physically on top of the blue tracks, completely swallowing overlapping intersections and letting perfect, clean diamond joints emerge naturally.
 9. Overlay a 10-column mechanical hardware mask network straight over the top of both curve engines to cleanly segment the continuous fluid paths into individual, addressable facet shards.
 10. Paint specific addressable facets by color to select your illuminated amber characters, natively using the specialized attic and basement spaces to let Series E-Modified capitals and Clearview-style wide-open lowercase descenders stylistically shine.
-
+72px stroke width fits perfectly into a 4-column block (4 × 18px = 72px).
 Cool Uses Bro
 * Graphic Sprite Sheet: It is light enough to be loaded directly into high-speed web interfaces. Frontend layouts can render complete sentences instantly by shifting CSS background positions, requiring zero JavaScript overhead.
 * As a Firmware Compiler Map: A Python script can translate the layout into a binary lookup array in milliseconds. The 45-bit words can be flashed straight into microcontrollers, allowing an embedded chip to drive an actual physical display panel on a train, bus, or industrial dashboard using simple bitwise shifts.
@@ -63,6 +70,33 @@ Cool Uses Bro
 NERD
 Data Word Density: Consumes a single 64-bit hardware memory word per display module, leaving 19 bits of unallocated space for localized telemetry or custom diagnostic flags.
 The horizontal mirroring and high-frequency oscillation of the blue helix tracks create three distinct physical convergence nodes. These serve an incredibly high-utility role for the display alphabet:
+
+THE PAN-LATIN DIACRITIC REGISTRY
+The Standard Core Matrix: A–Z (Uppercase), 0–9 (Numeric Engine), ? (Question Mark), ! (Exclamation), & (Ampersand), % (Percent), # (Hash / Octothorpe), . (Period), and , (Comma).The 84% Lowercase Engine: a–z (Lowercase tracks utilizing the 84% vertical compression rules).The French Extension Set: À, à, Â, â, Æ, æ, Ç, ç, É, é, È, è, Ê, ê, Ë, ë, Î, î, Ï, ï, Ô, ô, Œ, œ, Ù, ù, Û, û, Ü, ü.The Spanish Extension Set: Á, á, É, é, Í, í, Ó, ó, Ú, ú, Ü, ü, Ñ, ñ, ¡ (Inverted Exclamation), ¿ (Inverted Question Mark).
+
+True Lowercase Descenders (p, g, q, y): These are driven by the Outer Basement Track (Orange). Because your lowercase letters are scaled to your massive 84% height target, their loops sit perfectly inside the upper rows. Their vertical stems then plunge straight down through the baseline and utilize the extended orange loop tracks to finish their downward curve cleanly inside the basement, preserving your uniform word baseline.
+
+
+e Q-Tail & French Cedilla (Ç): These are driven by the Inner Basement Track (Mies Helix). The blue curve passes through the Row 12 Bottom Diamond and sweeps down into the lower margin, forming an elegant, continuous serpentine tail that loops under the letter for Q or anchors right below the center stem for a Ç.
+
+                  
+      [ Outer Attic Track ]               [ Inner Attic Track ]
+      (Orange Inward Curves)               (Mies Helix Waves)
+  +---------------------------+---------------------------------------+
+
+  | - Acute Accent (É, ó)      | - Circumflex (Â, î)                   |
+  | - Grave Accent (À, è)      | - Umlaut / Diaeresis (Ü, ï)           |
+  |                            | - Spanish Tilde / Enye (Ñ, ñ)         |
+  +---------------------------+---------------------------------------+
+  
+      [ Outer Basement Track ]            [ Inner Basement Track ]
+      (Orange Inward Curves)               (Mies Helix Waves)
+  +---------------------------+---------------------------------------+
+
+  | - True Lowercase Descenders | - Sweeping Q-Tails                    |
+  |   (p, g, q, y)            | - French Cedillas (Ç, ç)              |
+  | - Commas & Semicolons     | - Spanish Inverted Marks (¿, ¡)       |
+  +---------------------------+---------------------------------------+
 
 
 EXTRA
