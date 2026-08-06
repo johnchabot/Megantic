@@ -1,15 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://w3.org" viewBox="0 0 620 540" width="100%" height="100%">
-  <!--
-    ===================================================================
-    CLEANED, STYLED TRIPLE-CONVERGENCE DOUBLE-HELIX MASTER MATRIX
-    ===================================================================
-    - Framework: 10 Columns wide (18px steps) x 12 Rows high (30px steps).
-    - Dimensions: 180px Wide x 360px Tall (Attic: -15px, Basement: +15px).
-    - Features: Centralized CSS palette, interactive :hover activation states,
-                and zero presentation-attribute duplication code.
-    ===================================================================
-  -->
-
   <style>
     /* ==================== CENTRALIZED HARDWARE PALETTE ==================== */
     :root {
@@ -42,104 +32,77 @@
     .seg-block-off:hover  { fill: var(--seg-on);  stroke: #000000; filter: brightness(1.2); }
     .seg-swoosh-off:hover { stroke: var(--seg-on); filter: brightness(1.2); }
   </style>
-
   <defs>
-    <!-- ENGINE 1 GEOMETRY PROFILE: Cloned Rigid Orange Counter Tracks (Extending OUT) -->
-    <path id="orange-loop" d="M 0,180 L 0,90 C 0,10 20,-15 90,-15 L 90,15 C 45,15 30,45 30,90 L 30,180 Z" />
-
-    <!-- ENGINE 2 GEOMETRY PROFILE: Cloned Relaxed Mies Double-Helix Tracks (Triple Convergence) -->
-    <path id="mies-swoosh" d="M 0,-15 C 30,-15 50,30 90,30 C 130,30 140,135 90,195 C 40,255 50,360 90,360 C 130,360 150,375 180,375" />
-
-    <!-- SHARED MATRIX BACKING HOUSING CHASSIS -->
+    <path id="orange-loop" d="M 0,180 L 0,90 C 0,10 20,-15 90,-15 L 90,15 C 45,15 30,45 30,90 L 30,180 Z"></path>
+    <path id="mies-swoosh" d="M 0,-15 C 30,-15 50,30 90,30 C 130,30 140,135 90,195 C 40,255 50,360 90,360 C 130,360 150,375 180,375"></path>
     <g id="chassis-backing-panel">
-      <rect x="0" y="-15" width="180" height="390" class="bg-shield" />
-      <!-- Vertical 18px Ticks -->
-      <line x1="18"  y1="-15" x2="18"  y2="375" class="trace-line" />
-      <line x1="36"  y1="-15" x2="36"  y2="375" class="trace-line" />
-      <line x1="54"  y1="-15" x2="54"  y2="375" class="trace-line" />
-      <line x1="72"  y1="-15" x2="72"  y2="375" class="trace-line" />
-      <line x1="90"  y1="-15" x2="90"  y2="375" class="trace-axis" />
-      <line x1="108" y1="-15" x2="108" y2="375" class="trace-line" />
-      <line x1="126" y1="-15" x2="126" y2="375" class="trace-line" />
-      <line x1="144" y1="-15" x2="144" y2="375" class="trace-line" />
-      <line x1="162" y1="-15" x2="162" y2="375" class="trace-line" />
-      <!-- Horizontal 30px Ticks -->
-      <line x1="0"   y1="0"   x2="180" y2="0"   class="trace-line" />
-      <line x1="0"   y1="30"  x2="180" y2="30"  class="trace-line" />
-      <line x1="0"   y1="60"  x2="180" y2="60"  class="trace-line" />
-      <line x1="0"   y1="90"  x2="180" y2="90"  class="trace-line" />
-      <line x1="0"   y1="120" x2="180" y2="120" class="trace-line" />
-      <line x1="0"   y1="150" x2="180" y2="150" class="trace-line" />
-      <line x1="0"   y1="180" x2="180" y2="180" class="trace-axis" />
-      <line x1="0"   y1="210" x2="180" y2="210" class="trace-line" />
-      <line x1="0"   y1="240" x2="180" y2="240" class="trace-line" />
-      <line x1="0"   y1="270" x2="180" y2="270" class="trace-line" />
-      <line x1="0"   y1="300" x2="180" y2="300" class="trace-line" />
-      <line x1="0"   y1="330" x2="180" y2="330" class="trace-line" />
-      <line x1="0"   y1="360" x2="180" y2="360" class="trace-line" />
+      <rect x="0" y="-15" width="180" height="390" class="bg-shield"></rect>
+      <line x1="18" y1="-15" x2="18" y2="375" class="trace-line"></line>
+      <line x1="36" y1="-15" x2="36" y2="375" class="trace-line"></line>
+      <line x1="54" y1="-15" x2="54" y2="375" class="trace-line"></line>
+      <line x1="72" y1="-15" x2="72" y2="375" class="trace-line"></line>
+      <line x1="90" y1="-15" x2="90" y2="375" class="trace-axis"></line>
+      <line x1="108" y1="-15" x2="108" y2="375" class="trace-line"></line>
+      <line x1="126" y1="-15" x2="126" y2="375" class="trace-line"></line>
+      <line x1="144" y1="-15" x2="144" y2="375" class="trace-line"></line>
+      <line x1="162" y1="-15" x2="162" y2="375" class="trace-line"></line>
+      <line x1="0" y1="0" x2="180" y2="0" class="trace-line"></line>
+      <line x1="0" y1="30" x2="180" y2="30" class="trace-line"></line>
+      <line x1="0" y1="60" x2="180" y2="60" class="trace-line"></line>
+      <line x1="0" y1="90" x2="180" y2="90" class="trace-line"></line>
+      <line x1="0" y1="120" x2="180" y2="120" class="trace-line"></line>
+      <line x1="0" y1="150" x2="180" y2="150" class="trace-line"></line>
+      <line x1="0" y1="180" x2="180" y2="180" class="trace-axis"></line>
+      <line x1="0" y1="210" x2="180" y2="210" class="trace-line"></line>
+      <line x1="0" y1="240" x2="180" y2="240" class="trace-line"></line>
+      <line x1="0" y1="270" x2="180" y2="270" class="trace-line"></line>
+      <line x1="0" y1="300" x2="180" y2="300" class="trace-line"></line>
+      <line x1="0" y1="330" x2="180" y2="330" class="trace-line"></line>
+      <line x1="0" y1="360" x2="180" y2="360" class="trace-line"></line>
     </g>
-
-    <!-- SHARD CUTTER BLADES LAYER (The Hardware Mask Overlays) -->
     <g id="mechanical-slice-mask">
-      <line x1="0" y1="30"  x2="180" y2="30"  class="mask-blade" />
-      <line x1="0" y1="60"  x2="180" y2="60"  class="mask-blade" />
-      <line x1="0" y1="90"  x2="180" y2="90"  class="mask-blade" />
-      <line x1="0" y1="120" x2="180" y2="120" class="mask-blade" />
-      <line x1="0" y1="150" x2="180" y2="150" class="mask-blade" />
-      <line x1="0" y1="210" x2="180" y2="210" class="mask-blade" />
-      <line x1="0" y1="240" x2="180" y2="240" class="mask-blade" />
-      <line x1="0" y1="270" x2="180" y2="270" class="mask-blade" />
-      <line x1="0" y1="300" x2="180" y2="300" class="mask-blade" />
-      <line x1="0" y1="330" x2="180" y2="330" class="mask-blade" />
-      <line x1="18" y1="0"  x2="18"  y2="360" class="mask-blade" />
-      <line x1="54" y1="0"  x2="54"  y2="360" class="mask-blade" />
-      <line x1="126" y1="0" x2="126" y2="360" class="mask-blade" />
-      <line x1="162" y1="0" x2="162" y2="360" class="mask-blade" />
+      <line x1="0" y1="30" x2="180" y2="30" class="mask-blade"></line>
+      <line x1="0" y1="60" x2="180" y2="60" class="mask-blade"></line>
+      <line x1="0" y1="90" x2="180" y2="90" class="mask-blade"></line>
+      <line x1="0" y1="120" x2="180" y2="120" class="mask-blade"></line>
+      <line x1="0" y1="150" x2="180" y2="150" class="mask-blade"></line>
+      <line x1="0" y1="210" x2="180" y2="210" class="mask-blade"></line>
+      <line x1="0" y1="240" x2="180" y2="240" class="mask-blade"></line>
+      <line x1="0" y1="270" x2="180" y2="270" class="mask-blade"></line>
+      <line x1="0" y1="300" x2="180" y2="300" class="mask-blade"></line>
+      <line x1="0" y1="330" x2="180" y2="330" class="mask-blade"></line>
+      <line x1="18" y1="0" x2="18" y2="360" class="mask-blade"></line>
+      <line x1="54" y1="0" x2="54" y2="360" class="mask-blade"></line>
+      <line x1="126" y1="0" x2="126" y2="360" class="mask-blade"></line>
+      <line x1="162" y1="0" x2="162" y2="360" class="mask-blade"></line>
     </g>
   </defs>
-
-  <!-- ==================== PANEL 1: INTERACTIVE EXPERIMENTAL MESH (LEFT) ==================== -->
   <g transform="translate(40, 70)">
-    <use href="#chassis-backing-panel" />
-
-    <!-- Unlit Mies Double-Helix Tracks (Hover to activate individual waves) -->
+    <use href="#chassis-backing-panel"></use>
     <g class="seg-swoosh-off">
-      <use href="#mies-swoosh" />
-      <use href="#mies-swoosh" transform="translate(180,0) scale(-1,1)" />
+      <use href="#mies-swoosh"></use>
+      <use href="#mies-swoosh" transform="translate(180,0) scale(-1,1)"></use>
     </g>
-
-    <!-- Unlit Orange Primary Loops (Hover to activate individual loops) -->
     <g class="seg-block-off">
-      <!-- Upper Extended Loop Set -->
-      <use href="#orange-loop" />
-      <use href="#orange-loop" transform="translate(180,0) scale(-1,1)" />
-      <!-- Lower Extended Loop Set (Flipped cleanly across Row 6.5 axis) -->
-      <use href="#orange-loop" transform="translate(0,390) scale(1,-1)" />
-      <use href="#orange-loop" transform="translate(180,390) scale(-1,-1)" />
+      <use href="#orange-loop"></use>
+      <use href="#orange-loop" transform="translate(180,0) scale(-1,1)"></use>
+      <use href="#orange-loop" transform="translate(0,390) scale(1,-1)"></use>
+      <use href="#orange-loop" transform="translate(180,390) scale(-1,-1)"></use>
     </g>
-
-    <!-- Mask over top cuts components into individual facet bricks optically -->
-    <use href="#mechanical-slice-mask" />
+    <use href="#mechanical-slice-mask"></use>
   </g>
-
-  <!-- ==================== PANEL 2: ACTIVE HARDWARE GLYPH ATLAS (RIGHT) ==================== -->
   <g transform="translate(360, 70)">
-    <use href="#chassis-backing-panel" />
-
-    <!-- Active Illuminated Mies Helix Centerpiece (Engine 2) -->
+    <use href="#chassis-backing-panel"></use>
     <g class="seg-swoosh-on">
-      <use href="#mies-swoosh" />
-      <use href="#mies-swoosh" transform="translate(180,0) scale(-1,1)" />
+      <use href="#mies-swoosh"></use>
+      <use href="#mies-swoosh" transform="translate(180,0) scale(-1,1)"></use>
     </g>
-
-    <!-- Active Dominant Orange Loops ("Orange Wins" Overlap Priority - Engine 1) -->
     <g class="seg-block-on">
-      <use href="#orange-loop" />
-      <use href="#orange-loop" transform="translate(180,0) scale(-1,1)" />
-      <use href="#orange-loop" transform="translate(0,390) scale(1,-1)" />
-      <use href="#orange-loop" transform="translate(180,390) scale(-1,-1)" />
+      <use href="#orange-loop"></use>
+      <use href="#orange-loop" transform="translate(180,0) scale(-1,1)"></use>
+      <use href="#orange-loop" transform="translate(0,390) scale(1,-1)"></use>
+      <use href="#orange-loop" transform="translate(180,390) scale(-1,-1)"></use>
     </g>
-
-    <use href="#mechanical-slice-mask" />
+    <use href="#mechanical-slice-mask"></use>
   </g>
 </svg>
