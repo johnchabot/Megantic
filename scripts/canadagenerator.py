@@ -206,20 +206,24 @@ def generate_sprite_sheet(font_path):
     # CELL DIMENSIONS
     # ------------------------------------------------------------------
 
-    BASE_CELL_W = 18
-    BASE_CELL_H = 48
-    LABEL_BOX_H = 24
-    PAD_RIGHT = 12
-    PAD_BOTTOM = 8
-    ROW_PAD_LEFT = 20
-    ROW_PAD_TOP = 20
+# ------------------------------------------------------------------
+# CELL DIMENSIONS (Updated)
+# ------------------------------------------------------------------
 
-    def cell_dimensions(scale):
-        glyph_w = int(BASE_CELL_W * scale)
-        glyph_h = int(BASE_CELL_H * scale)
-        label_h = int(LABEL_BOX_H * scale)
-        total_h = glyph_h + label_h
-        return glyph_w, glyph_h, label_h, total_h
+BASE_CELL_W = 18
+BASE_CELL_H = 48
+LABEL_BOX_H = 24
+PAD_RIGHT = 12
+PAD_BOTTOM = 6          # ← updated: 6
+ROW_PAD_LEFT = 24       # ← updated: 24 (2 × 12)
+ROW_PAD_TOP = 24        # ← updated: 24 (2 × 12)
+
+def cell_dimensions(scale):
+    glyph_w = int(BASE_CELL_W * scale)
+    glyph_h = int(BASE_CELL_H * scale)
+    label_h = int(LABEL_BOX_H * scale)
+    total_h = glyph_h + label_h
+    return glyph_w, glyph_h, label_h, total_h
 
     # ------------------------------------------------------------------
     # EXTRACT GLYPHS
@@ -302,16 +306,70 @@ def generate_sprite_sheet(font_path):
     output.append(f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {max_width} {total_height}" width="{max_width}" height="{total_height}">')
 
     # --- CSS with dark mode colors ---
-    output.append('  <style>')
-    output.append('    :root {')
-    output.append('      --bg-color: #2a2e2f;   /* dark grey background */')
-    output.append('      --glyph-color: #f0f0f0; /* off-white glyphs */')
-    output.append('      --label-color: #f0f0f0; /* off-white labels */')
-    output.append('    }')
-    output.append('    svg { background: var(--bg-color); }')
-    output.append('    .glyph-on { fill: var(--glyph-color); }')
-    output.append('    .glyph-label { fill: var(--label-color); font-family: "Arial Narrow", "Helvetica Condensed", sans-serif; font-weight: bold; text-anchor: middle; }')
-    output.append('  </style>')
+# --- CSS with light-dark() and grid toggling ---
+output.append('  <style>')
+output.append('    :root {')
+output.append('      /* Enable light/dark mode detection */')
+output.append('      color-scheme: light dark;')
+output.append('')
+output.append('      /* Background */')
+output.append('      --bg-color: light-dark(#ffffff, #1a1a1a);')
+output.append('')
+output.append('      /* Grid colors (relational opacity) */')
+output.append('      --fine-grid-color: light-dark(#a0a0a0, #4a4a4a);')
+output.append('      --coarse-grid-color: light-dark(#666666, #999999);')
+output.append('      --border-color: light-dark(#333333, #cccccc);')
+output.append('')
+output.append('      /* Grid opacities */')
+output.append('      --fine-opacity: 0.25;')
+output.append('      --coarse-opacity: 0.35;')
+output.append('      --border-opacity: 0.5;')
+output.append('')
+output.append('      /* Glyph and label colors */')
+output.append('      --glyph-color: light-dark(#000000, #f0f0f0);')
+output.append('      --label-color: var(--glyph-color);')
+output.append('')
+output.append('      /* Grid toggling */')
+output.append('      --grid-display: block;')
+output.append('    }')
+output.append('')
+output.append('    /* Toggle grid off */')
+output.append('    .hide-grid { --grid-display: none; }')
+output.append('')
+output.append('    svg { background: var(--bg-color); }')
+output.append('    .glyph-on { fill: var(--glyph-color); }')
+output.append('    .glyph-label { fill: var(--label-color); font-family: "Arial Narrow", "Helvetica Condensed", sans-serif; font-weight: bold; text-anchor: middle; }')
+output.append('')
+output.append('    /* Grid lines container */')
+output.append('    .grid-lines { display: var(--grid-display, block); }')
+output.append('    .grid-line { fill: none; }')
+output.append('  </style>')
+
+# --- GRID PATTERNS ---
+output.append('  <defs>')
+output.append('    <!-- 6×6 fine sub‑grid -->')
+output.append('    <pattern id="fine-grid" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="translate(24, 24)">')
+output.append('      <line x1="0" y1="6" x2="6" y2="6" stroke="var(--fine-grid-color)" stroke-width="0.3" opacity="var(--fine-opacity)"/>')
+output.append('      <line x1="6" y1="0" x2="6" y2="6" stroke="var(--fine-grid-color)" stroke-width="0.3" opacity="var(--fine-opacity)"/>')
+output.append('    </pattern>')
+output.append('')
+output.append('    <!-- 24×24 coarse grid (4 × 6) -->')
+output.append('    <pattern id="coarse-grid" width="24" height="24" patternUnits="userSpaceOnUse" patternTransform="translate(24, 24)">')
+output.append('      <!-- Fine grid fills each coarse cell -->')
+output.append('      <rect width="24" height="24" fill="url(#fine-grid)"/>')
+output.append('      <!-- Coarse grid lines -->')
+output.append('      <line x1="0" y1="24" x2="24" y2="24" stroke="var(--coarse-grid-color)" stroke-width="0.8" opacity="var(--coarse-opacity)"/>')
+output.append('      <line x1="24" y1="0" x2="24" y2="24" stroke="var(--coarse-grid-color)" stroke-width="0.8" opacity="var(--coarse-opacity)"/>')
+output.append('    </pattern>')
+output.append('  </defs>')
+
+# --- BACKGROUND ---
+output.append('  <!-- Graph paper background (togglable via .hide-grid) -->')
+output.append('  <g class="grid-lines">')
+output.append(f'    <rect width="100%" height="100%" fill="url(#coarse-grid)"/>')
+# Canvas border overlay
+output.append(f'    <rect x="0" y="0" width="100%" height="100%" class="grid-line" stroke="var(--border-color)" stroke-width="1" opacity="var(--border-opacity)"/>')
+output.append('  </g>')
 
     # --- DEFS (glyphs) ---
     output.append('  <defs>')
