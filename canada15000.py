@@ -252,6 +252,7 @@ def generate_sprite_sheet(font_path):
     out.append('    }')
     out.append('  </style>')
 
+
     # CORE RECURSIVE LAYOUT DEFINITIONS (IrfanView Safe Fallbacks)
     out.append('  <defs>')
     out.append('    <!-- 1. THE ATOMIC UNIT (Base 6x6 Subdivision Grid) -->')
