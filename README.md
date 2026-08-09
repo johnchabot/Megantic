@@ -1,27 +1,31 @@
-# The Megantic Text Generator
-Structural translator, taking fluid vector artwork, compressing it into legacy hardware bitstreams, and then upscaling it into a clean, modern blueprint sheet.
+# Megantic
 
-## Hybrid typographic compilation pipeline low-level software engineering project
-## Recombobulates fonts across eras
-## Rasterization/Decompiling, Extraction, and Compression (RLE) Pipeline
+## Font Recombombulator (H2)
+Low-level typographic decompilation, Extraction, Refactoring/RLE Compression, thoughtful SVG file Pipeline
+Where the deterministic, pixel-locked world of last millennium + cartesian coordinate planes + modern vectors all collide
 
-### Where the eterministic, pixel-locked world of legacy hardware and the continuous coordinate spaces of modern vectors collide .**
+### Subsection Header (H3)
+* Teleport typefaces from legacy retro digital eras (Safely and ethically)
+* Recombobulates the inside: 
+* Outputs in human-readable, simple, and efficient vector (.SVG) goodness
+* 
+* Second main bullet point
+    * Indented sub-bullet point (use 4 spaces or 1 tab to indent)
+    * Another sub-bullet point
+* Third main bullet point
+
+| Font | Languages |
+|-----:|-----------|
+|     Megantic|  (SVG to SVG)  segment-based vector font system where each glyph is constructed from a 45‑bit "recipe" of geometric shards // 45-Segment Structural Expressivist Addressable Display matrix // Pan-Latin Heavy Transit Matrix |
+|     TheDRAW Engine| (BIN to SVG) Hand-stitches bitmap into RLL-encoded single <SVG> path command: M{x},{y}h{width}.   |
+|     Canada15000| (OFT to SVG) Okanagan Cherry-picks the best glyphs into a cool Sprite
+|
+
+
 - Intentionally-architected mies intercepting scalable vector geometries
 
 
-## APPLICATION OF 1,000 FACES ##
-
-| Rank | Languages |
-|-----:|-----------|
-|     1| JavaScript|
-|     2| Python    |
-|     3| SQL       |
-
- 
-## RETRO FONTS ##
-### Megantic (SVG to SVG)  ### segment-based vector font system where each glyph is constructed from a 45‑bit "recipe" of geometric shards // 45-Segment Structural Expressivist Addressable Display matrix // Pan-Latin Heavy Transit Matrix  
-
-### CP437 feat. TheDRAW Engine (BIN to SVG) ### Hand-stitches bitmap into RLL-encoded single <SVG> path command: M{x},{y}h{width}.
+###  
 **Thing A** <font color="#FF0000">*</font> **Classic Rasterization, Extraction, and Run-Length Compression Encoding (RLE) Pipeline.**
 *Recompile extracted vector glyph curves into standard structural parameters.**
 ### (OTF to SVG) CANADA15000 ### Takes a permissively licensed file and refactors it into a SVG sprite 
@@ -33,6 +37,15 @@ Structural translator, taking fluid vector artwork, compressing it into legacy h
 ## OUTPUT ##
 ✔️ .SVG Typeface Sprites in clean, consistenthuman-readable, XML goodness
 ✔️ Optional: 2D Cartesian Control Plane with a 6x6 grid on a 2:1 format
+
+
+It combines your custom character matrix arrays, the uniform 72-unit Monospaced Workspace Architecture, automated 2:1 cross-cutting perimeter tick calculations, and native XML presentation attributes to make the output document completely safe for legacy tools like IrfanView.
+
+###  .**
+
+
+
+
 
 
     If two runs are vertically adjacent and have the same x and width, the script does not merge them (to keep generation simple and the path commands straightforward). However, the path string is still dramatically smaller than <rect> tags because each run is just Mx,yhw instead of <rect x="..." y="..." width="..." height="..."/>.
