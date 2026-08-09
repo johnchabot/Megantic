@@ -359,8 +359,8 @@ def generate_sprite_sheet(font_path):
             current_x += BASE_CELL_W
         out.append('    </g>')
         
-        # B. Render separate dual-notation metadata labels line (Steps down 60px inside the module)
-        out.append(f'    <g id="{row_base_id}-labels" data-row="{escape_xml_attr(group_name)}" transform="translate(0, {current_y + 60})">')
+        # B. Render separate dual-notation metadata labels line (Inherits the grid control plane visibility setting)
+        out.append(f'    <g id="{row_base_id}-labels" data-row="{escape_xml_attr(group_name)}" transform="translate(0, {current_y + 60})" class="control-plane">')
         current_x = 0
         for char in chars:
             code = glyphs_data[char]["code"]
@@ -369,7 +369,7 @@ def generate_sprite_sheet(font_path):
             
             # Stack Line 1: Standard Hexadecimal Unicode notation (U+XXXX)
             out.append(f'      <text x="{label_x}" y="-2" class="technical-notation">U+{code:04X}</text>')
-            # Stack Line 2: The true PostScript "Friendly Design Name" string literal
+            # Stack Line 2: The True PostScript "Friendly Design Name" string literal
             out.append(f'      <text x="{label_x}" y="6" class="technical-notation">{escape_xml_attr(friendly_name)}</text>')
             current_x += BASE_CELL_W
         out.append('    </g>')
