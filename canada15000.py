@@ -261,43 +261,41 @@ def generate_sprite_sheet(font_path):
 
 
     # CORE RECURSIVE LAYOUT DEFINITIONS (IrfanView Safe Fallbacks)
+    # RECURSIVE CARTESIAN SYSTEM BACKGROUND ARCHITECTURE
     out.append('  <defs>')
     out.append('    <!-- 1. THE ATOMIC UNIT (Base 6x6 Subdivision Grid) -->')
     out.append('    <pattern id="atomic-unit" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="translate(72, 108)">')
-    out.append('      <line x1="0" y1="6" x2="6" y2="6" stroke="var(--atomic-axis-color)" stroke-width="0.3" opacity="0.25" class="atomic-axis"/>')
-    out.append('      <line x1="6" y1="0" x2="6" y2="6" stroke="var(--atomic-axis-color)" stroke-width="0.3" opacity="0.25" class="atomic-axis"/>')
+    out.append('      <line x1="0" y1="6" x2="6" y2="6" stroke="#a3b8c2" stroke-width="0.3" opacity="0.22" class="atomic-axis"/>')
+    out.append('      <line x1="6" y1="0" x2="6" y2="6" stroke="#a3b8c2" stroke-width="0.3" opacity="0.22" class="atomic-axis"/>')
     out.append('    </pattern>')
-    out.append('')
     out.append('    <!-- 2. THE MACRO ENCLOSURE (Recursive 72x72 Cartesian Module with Origin crosshairs) -->')
     out.append('    <pattern id="macro-enclosure" width="72" height="72" patternUnits="userSpaceOnUse" patternTransform="translate(72, 108)">')
     out.append('      <rect width="72" height="72" fill="url(#atomic-unit)"/>')
-    out.append('      <line x1="0" y1="72" x2="72" y2="72" stroke="var(--macro-axis-color)" stroke-width="0.8" opacity="0.40" class="macro-axis"/>')
-    out.append('      <line x1="72" y1="0" x2="72" y2="72" stroke="var(--macro-axis-color)" stroke-width="0.8" opacity="0.40" class="macro-axis"/>')
-    out.append('')
-    out.append('      <!-- The Technical Blueprint Origin Crosshair Indicators -->')
-    out.append('      <!-- Visualizes true Typographic Origin X=18 and Baseline Y=48 inside every monospaced slot -->')
-    out.append('      <line x1="18" y1="0" x2="18" y2="72" stroke="var(--macro-axis-color)" stroke-width="0.6" stroke-dasharray="2,2" opacity="0.55" class="macro-axis"/>')
-    out.append('      <line x1="0" y1="48" x2="72" y2="48" stroke="var(--macro-axis-color)" stroke-width="0.6" stroke-dasharray="2,2" opacity="0.55" class="macro-axis"/>')
-    out.append('      <circle cx="18" cy="48" r="1.2" fill="var(--macro-axis-color)" opacity="0.7"/>')
+    out.append('      <line x1="0" y1="72" x2="72" y2="72" stroke="#5c727d" stroke-width="0.8" opacity="0.40" class="macro-axis"/>')
+    out.append('      <line x1="72" y1="0" x2="72" y2="72" stroke="#5c727d" stroke-width="0.8" opacity="0.40" class="macro-axis"/>')
+    out.append('      <!-- Blueprint Technical Crosshairs: Intersects at Typographic Origin X=18 and Baseline Y=18 -->')
+    out.append('      <line x1="18" y1="0" x2="18" y2="72" stroke="#5c727d" stroke-width="0.6" stroke-dasharray="1,2" opacity="0.50" class="macro-axis"/>')
+    out.append('      <line x1="0" y1="18" x2="72" y2="18" stroke="#5c727d" stroke-width="0.6" stroke-dasharray="1,2" opacity="0.50" class="macro-axis"/>')
+    out.append('      <circle cx="18" cy="18" r="1.0" fill="#5c727d" opacity="0.6"/>')
     out.append('    </pattern>')
     out.append('  </defs>')
 
-
-    # === COMPILING FRAME LAYER & AUTOMATED NOTCH TICKS ===
+    # LAYER 1: BACKDROP PLANE & HARDCODED PERIMETER FRAME LOOPS (IrfanView Safe)
     out.append('  <g id="construction-plane">')
     out.append('    <rect width="100%" height="100%" fill="url(#macro-enclosure)"/>')
     active_w = max_width - 144
     active_h = total_height - 180
-    out.append(f'    <rect x="72" y="108" width="{active_w}" height="{active_h}" fill="none" stroke-width="1.2" opacity="0.70" class="perimeter-frame"/>')
+    out.append(f'    <rect x="72" y="108" width="{active_w}" height="{active_h}" fill="none" stroke="#1e2930" stroke-width="1.2" opacity="0.65" class="perimeter-frame"/>')
 
-    # Programmatic Loops: Safely outputs discrete cross-cutting border ticks along boundaries (IrfanView Bulletproof)
+    # Programmatic Loops: Safely outputs discrete cross-cutting border ticks along boundaries
     for tx in range(72, max_width - 71, 72):
-        out.append(f'    <line x1="{tx}" y1="104" x2="{tx}" y2="112" stroke-width="1.0" opacity="0.65" class="tick-mark"/>')
-        out.append(f'    <line x1="{tx}" y1="{total_height - 76}" x2="{tx}" y2="{total_height - 68}" stroke-width="1.0" opacity="0.65" class="tick-mark"/>')
+        out.append(f'    <line x1="{tx}" y1="104" x2="{tx}" y2="112" stroke="#1e2930" stroke-width="1.0" opacity="0.65" class="tick-mark"/>')
+        out.append(f'    <line x1="{tx}" y1="{total_height - 76}" x2="{tx}" y2="{total_height - 68}" stroke="#1e2930" stroke-width="1.0" opacity="0.65" class="tick-mark"/>')
     for ty in range(108, total_height - 71, 72):
-        out.append(f'    <line x1="68" y1="{ty}" x2="76" y2="{ty}" stroke-width="1.0" opacity="0.65" class="tick-mark"/>')
-        out.append(f'    <line x1="{max_width - 76}" y1="{ty}" x2="{max_width - 68}" y2="{ty}" stroke-width="1.0" opacity="0.65" class="tick-mark"/>')
+        out.append(f'    <line x1="68" y1="{ty}" x2="76" y2="{ty}" stroke="#1e2930" stroke-width="1.0" opacity="0.65" class="tick-mark"/>')
+        out.append(f'    <line x1="{max_width - 76}" y1="{ty}" x2="{max_width - 68}" y2="{ty}" stroke="#1e2930" stroke-width="1.0" opacity="0.65" class="tick-mark"/>')
     out.append('  </g>')
+
 
     # === MICRO-PATCH: INJECT DYNAMIC BLUEPRINT TITLE HEADER ===
     # === REPAIRED METADATA HEADER ASSEMBLY ===
