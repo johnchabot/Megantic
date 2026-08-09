@@ -178,6 +178,10 @@ def extract_glyph_with_bounds(font, unicode_map, char, cell_w, cell_h):
         transform = f"translate({tx:.2f}, {ty:.2f}) scale({scale:.4f}, {-scale:.4f})"
         return raw_path, transform, cell_w, cell_h, glyph_name
 
+
+
+
+
 def generate_sprite_sheet(font_path):
     if not os.path.exists(font_path):
         print(f"❌ Error: File target location does not exist: {font_path}")
@@ -200,10 +204,22 @@ def generate_sprite_sheet(font_path):
 
   
     glyphs_data = {}
-    for char, code in CHARACTER_SET.items():
-        path, transform, _, _, glyph_name = extract_glyph_with_bounds(font, unicode_map, char, BASE_CELL_W, BASE_CELL_H)
 
-        # CRITICAL SAFETY HOOK: If path is None, skip this char entirely
+    
+
+
+
+    # === SURGICAL SAFETNET PATCH ===
+    for char, code in CHARACTER_SET.items():
+        try:
+            res = extract_glyph_with_bounds(font, unicode_map, char, BASE_CELL_W, BASE_CELL_H)
+            if res is None:
+                continue
+            path, transform, _, _, glyph_name = res
+        except TypeError:
+            # Safely catch any unpack error if a rogue None leaks out
+            continue
+
         if path is not None:
             glyphs_data[char] = {
                 "char": char,
@@ -211,7 +227,7 @@ def generate_sprite_sheet(font_path):
                 "path": path,
                 "transform": transform,
                 "group": get_group_for_char(char),
-                "glyph_name": glyph_name
+                "glyph_name": glyph_name,
             }
 
     built_rows = []
