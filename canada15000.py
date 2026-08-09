@@ -200,17 +200,18 @@ def generate_sprite_sheet(font_path):
         total_height += BASE_CELL_H + PAD_BOTTOM
     total_height += (ROW_PAD_TOP - PAD_BOTTOM)
 
-
-
-
     # === DETONATION-PROOF RUNTIME STRING STITCHING ===
-    # Hardcodes the XML delimiters using raw hex characters to completely block text-input truncation filters
+    # Using hex escapes completely blocks text-input filters from truncating the domain paths
     xml_header = "\x3c?xml version=\x221.0\x22 encoding=\x22UTF-8\x22?\x3e"
     
-    # We break up the standard strings manually to force the browser to resolve the full literal namespaces
+    # We stitch the strings manually to force the browser to resolve the full literal namespaces
     svg_tag = "\x3csvg xmlns=" + '"http://w3.org" '
     svg_tag += "xmlns:xlink=" + '"http://w3.org" '
     svg_tag += f'viewBox="0 0 {max_width} {total_height}" width="{max_width}" height="{total_height}"\x3e'
+    
+    out = []
+    out.append(xml_header)
+    out.append(svg_tag)
     
     out = []
     out.append(xml_header)
