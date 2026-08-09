@@ -1,18 +1,17 @@
 # Megantic
+## High-Density Typographic Matrix Generator Recombuboluation Engine
+✔️ INPUT: Distill old one-of-a-kind and retro typefaces (.SVG, .OFT, .BIN)  
+✔️ RECONBOBULATE: Decompile, extract, taxonomize, and legally compress in Run-Length Compression Encoding (RLE)   
+✔️ PRESERVE: Human-Readable, hand-sewn, highly efficient sprite (.SVG)  
 
-## Mies-inspired Typographic Era Timewarp
-✔️ INPUT: Distill old one-of-a-kind and retro typefaces (.SVG, .OFT, .BIN)
-✔️ RECONBOBULATE: Decompile, extract, taxonomize, and legally compress in Run-Length Compression Encoding (RLE) 
-✔️ PRESERVE: Human-Readable, hand-sewn, highly efficient sprite (.SVG)
-
-### Subsection Header
-* Rebuild in a highly-efficient, light-weight, , performance-critical way
-* co2-friendly Encodes  RLL-encoded single <SVG> path command: M{x},{y}h{width}
-* Outputs in human-readable, simple, and efficient vector (.SVG) goodness
-* Options:
-    * : D Cartesian Control Plane with a 6x6 grid on a 2:1 format
-    * : 8x16 
-    * CANADA1500: 
+## Mies-inspired code, human readable  
+* Rebuild in a highly-efficient, light-weight, , performance-critical way  
+* co2-friendly Encodes  RLL-encoded single <SVG> path command: M{x},{y}h{width}  
+* Outputs in human-readable, simple, and efficient vector (.SVG) goodness  
+* Options:  
+    * : D Cartesian Control Plane with a 6x6 grid on a 2:1 format  
+    * : 8x16   
+    * CANADA1500:   
 * Optional: 2
 
 ### Typeface Options
@@ -28,9 +27,17 @@ It combines your custom character matrix arrays, the uniform 72-unit Monospaced 
 
 ###  .**
 
+The 72-Unit Monospaced Matrix Pitch: Every character row steps deterministically at an exact horizontal interval of 72 units. Every glyph occupies an identical workspace envelope, making your template highly uniform.
 
+Proportional 1:12 Technical Sublabels: The metadata notations (U+XXXX) are rendered cleanly on the cell baseline, scaled precisely to an explicit height of 6 units to match the 12-grid system.
 
+Programmatic 2:1 Perimeter Ticks: Instead of manually writing tedious layout coordinates, we leveraged Python loops to dynamically compute your canvas width and height and instantly draw the cross-cutting border notches.
 
+IrfanView Safe Fallbacks: By hardcoding XML presentation attributes (like stroke="#a3b8c2", stroke-width="0.3", and fill="#000000") directly onto your vector elements, the output file renders perfectly offline without stumbling over modern browser CSS parsing runtime engines.
+
+The High-Density Monolithic Refactor: We rolled back the compact, single-line procedural approach. Your script maintains its highly explicit, readable layout structure, which preserves the custom data structures and explicit formatting loops you originally wrote.
+
+Structural Taxonomy Nomenclature Changes: We stepped back from rewriting your custom variable names into abstract identities. Your engine uses the exact variable names, loop trackers, and list styles you are comfortable reading and debugging.
 
 
     If two runs are vertically adjacent and have the same x and width, the script does not merge them (to keep generation simple and the path commands straightforward). However, the path string is still dramatically smaller than <rect> tags because each run is just Mx,yhw instead of <rect x="..." y="..." width="..." height="..."/>.
