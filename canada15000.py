@@ -80,27 +80,35 @@ ROWS = [
     ("Symbols", ["–", "—", "‘", "’", "•", "…", "←", "↑", "→", "↓", "↔", "↕", "☺", "☼", "♀", "♂", "♥"]),
 ]
 
+
+
 def get_group_for_char(char):
-
     # SAFETY CLIP: Automatically resolve any escaped multi-character strings
-    if len(char) > 1: char = "\\" if "\\" in char else char[0]
+    if len(char) > 1: 
+        char = "\\" if "\\" in char else char
 
-    if char == " ": return "Space"
-    elif char.isdigit(): return "Digits"
-
-    
-    if char == " ": return "Space"
-    elif char.isdigit(): return "Digits"
-    elif char.isupper(): return "Uppercase"
-    elif char.islower(): return "Lowercase"
-    elif char in ["§", "¨", "«", "»", "¼", "½", "¿"]: return "ASCII+Weird"
-    elif ord(char) in range(0x00C0, 0x00FF + 1): return "French/Spanish"
-    elif ord(char) in [0x2013, 0x2014, 0x2018, 0x2019, 0x2022, 0x2026, 0x2190, 0x2191, 0x2192, 0x2193, 0x2194, 0x2195, 0x263A, 0x263C, 0x2640, 0x2642, 0x2665]: return "Symbols"
-    else: return "Keyboard"
+    # === FULL RESTORATION OF ORIGINAL STRUCTURAL CONVENTIONS ===
+    if char == " ":
+        return "Space"
+    elif char.isdigit():
+        return "Digits"
+    elif char.isupper():
+        return "Uppercase"
+    elif char.islower():
+        return "Lowercase"
+    elif char in ["§", "¨", "«", "»", "¼", "½", "¿"]:
+        return "ASCII+Weird"
+    elif ord(char) in range(0x00C0, 0x00FF + 1):
+        return "French/Spanish"
+    elif ord(char) in [0x2013, 0x2014, 0x2018, 0x2019, 0x2022, 0x2026, 0x2190, 0x2191, 0x2192, 0x2193, 0x2194, 0x2195, 0x263A, 0x263C, 0x2640, 0x2642, 0x2665]:
+        return "Symbols"
+    else:
+        return "Keyboard"
 
 def escape_xml_attr(value):
     if value is None: return ""
     return str(value).replace("&", "&amp;").replace('"', "&quot;").replace("<", "&lt;").replace(">", "&gt;").replace("'", "&apos;")
+
 
 def extract_glyph_with_bounds(font, unicode_map, char, cell_w, cell_h):
     # Safety Interceptor: Automatically resolve multi-character escaping artifacts
