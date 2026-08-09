@@ -332,8 +332,6 @@ def generate_sprite_sheet(font_path):
         escaped_char = escape_xml_attr(char)
         escaped_group = escape_xml_attr(group)
         escaped_path = escape_xml_attr(path)
-
-    # --- END OF DEFS DICTIONARY LOOP BLOCK ---
         out.append(f'    <!-- Vector Database Entry: "{escaped_char}" (U+{code:04X}) -->')
         out.append(f'    <g id="canada-{code}" data-index="{code}" data-group="{escaped_group}" data-name="{escaped_char}">')
         if path and transform:
@@ -348,20 +346,7 @@ def generate_sprite_sheet(font_path):
     # === FIXED SPECIMEN WORKSPACE MATRIX STACK ENTRY ===
     out.append('  <g id="typographic-specimen-matrix" transform="translate(72, 108)">')
     current_y = 0
-        out.append(f'    <!-- Vector Database Entry: "{escaped_char}" (U+{code:04X}) -->')
-        out.append(f'    <g id="canada-{code}" data-index="{code}" data-group="{escaped_group}" data-name="{escaped_char}">')
-        if path and transform:
-            out.append(f'      <g transform="{transform}">')
-            out.append(f'        <path d="{escaped_path}" fill="#000000" class="glyph-on"/>')
-            out.append('      </g>')
-        elif path:
-            out.append(f'      <path d="{escaped_path}" fill="#000000" class="glyph-on"/>')
-        out.append('    </g>')
-    out.append('  </defs>')
 
-    # === FIXED SPECIMEN WORKSPACE MATRIX STACK ENTRY ===
-    out.append('  <g id="typographic-specimen-matrix" transform="translate(72, 108)">')
-    current_y = 0
     
     for group_name, chars in built_rows:
         out.append(f'    <!-- SPECIMEN TRACK GROUP: {escape_xml_attr(group_name)} -->')
