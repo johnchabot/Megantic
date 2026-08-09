@@ -289,7 +289,6 @@ def generate_sprite_sheet(font_path):
         out.append(f'    <line x1="{max_width - 76}" y1="{ty}" x2="{max_width - 68}" y2="{ty}" stroke-width="1.0" opacity="0.65" class="tick-mark"/>')
     out.append('  </g>')
 
-
     # === MICRO-PATCH: INJECT DYNAMIC BLUEPRINT TITLE HEADER ===
     internal_font_name = "Alternative Custom Typeface"
     try:
@@ -304,7 +303,6 @@ def generate_sprite_sheet(font_path):
     out.append(f'    <text x="0" y="0" class="blueprint-title-main">TYPOGRAPHIC SPECIMEN MATRIX // SYSTEM NAME: {escaped_fontname}</text>')
     out.append(f'    <text x="0" y="12" class="blueprint-title-sub">SOURCE FILE: {escaped_filename} / WORKSPACE: 72px MONOSPACED MODULES / MATRIX SCALE RATIO: 1:12 / RESOLVED ASSETS: {len(glyphs_data)}</text>')
     out.append('  </g>')
-
   
     # === INJECT THE 1:12 METADATA TITLE BLOCK ===
     out.append('  <!-- Proportional Technical Header Block (Scaled to 12px/6px system rules) -->')
@@ -377,7 +375,6 @@ def generate_sprite_sheet(font_path):
             out.append(f'      <use href="#canada-{code}" x="{current_x}" y="0"/>')
             current_x += BASE_CELL_W
         out.append('    </g>')
-
         
         # B. Render separate dual-notation metadata labels line (Steps down 60px inside the module)
         out.append(f'    <g id="{row_base_id}-labels" data-row="{escape_xml_attr(group_name)}" transform="translate(0, {current_y + 60})">')
