@@ -235,11 +235,12 @@ def generate_sprite_sheet(font_path):
 #CHUNK2 This section handles the generation of your verbose XML stream builder array, the modern light/dark embedded styles, the recursive atomic-unit and macro-enclosure defs, and the automated loop calculations for your cross-cutting 2:1 perimeter ticks.
 
     # --- VERBOSE XML COMPILATION STREAM GENERATOR ---
-    out = []
     # === REPAIRED FULL BLUEPRINT CANVAS HEADERS ===
+    out = []
     out.append('<?xml version="1.0" encoding="UTF-8"?>')
     out.append(f'<svg xmlns="http://w3.org" xmlns:xlink="http://w3.org" viewBox="0 0 {max_width} {total_height}" width="{max_width}" height="{total_height}">')
 
+    
     
     # CSS Custom Theme Injector (Browser responsive overrides)
     out.append('  <style type="text/css">')
@@ -299,8 +300,6 @@ def generate_sprite_sheet(font_path):
     out.append('  </g>')
 
 
-    # === MICRO-PATCH: INJECT DYNAMIC BLUEPRINT TITLE HEADER ===
-    # === REPAIRED METADATA HEADER ASSEMBLY ===
     # === REPAIRED METADATA HEADER ASSEMBLY ===
     internal_font_name = "Alternative Custom Typeface"
     try:
@@ -318,6 +317,7 @@ def generate_sprite_sheet(font_path):
     out.append(f'    <text x="0" y="0" class="blueprint-title-main">TYPOGRAPHIC SPECIMEN MATRIX // SYSTEM NAME: {escaped_fontname}</text>')
     out.append(f'    <text x="0" y="12" class="blueprint-title-sub">SOURCE FILE: {escaped_filename} / WORKSPACE: 72px MONOSPACED MODULES / MATRIX SCALE RATIO: 1:12 / RESOLVED ASSETS: {len(glyphs_data)}</text>')
     out.append('  </g>')
+
 
 
   
