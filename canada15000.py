@@ -207,24 +207,24 @@ def generate_sprite_sheet(font_path):
 
         # === SURGICAL SAFETNET PATCH ===
 
-
     glyphs_data = {}
 
     for char, code in CHARACTER_SET.items():
         res = extract_glyph_with_bounds(font, unicode_map, char, BASE_CELL_W, BASE_CELL_H)
-        if res is None:
+        
+        # Verify we received a safe, unpackable 5-part data sequence
+        if res is None or not isinstance(res, tuple) or len(res) < 5:
             continue
             
-        path, transform, _, _, glyph_name = res
-
-        if path is not None:
+        # Bypass direct variable unpacking to eliminate NoneType crashing
+        if res[0] is not None and res[0] != "":
             glyphs_data[char] = {
                 "char": char,
                 "code": code,
-                "path": path,
-                "transform": transform,
+                "path": res[0],
+                "transform": res[1],
                 "group": get_group_for_char(char),
-                "glyph_name": glyph_name,
+                "glyph_name": res[4],
             }
 
     built_rows = []
