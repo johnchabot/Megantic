@@ -103,10 +103,6 @@ def escape_xml_attr(value):
     return str(value).replace("&", "&amp;").replace('"', "&quot;").replace("<", "&lt;").replace(">", "&gt;").replace("'", "&apos;")
 
 def extract_glyph_with_bounds(font, unicode_map, char, cell_w, cell_h):
-
-
-
-
     
     # SAFETY CLIP: Automatically resolve any doubled or escaped multi-character strings
     if len(char) > 1:
@@ -127,6 +123,26 @@ def extract_glyph_with_bounds(font, unicode_map, char, cell_w, cell_h):
     if not raw_path: return "", None, 0, 0, glyph_name
     try: bounds = glyph.getBounds()
     except AttributeError: bounds = None
+
+    # === SURGICAL CORRECTION: SAFE TUPLE FALLBACK FOR MISSING CHARS ===
+    try:
+        upem = font['head'].unitsPerEm
+    except (KeyError, AttributeError):
+        upem = 1000  # Safe font fallback default if metadata is unreadable
+        
+    scale = min(48.0 / (upem * 0.7), 48.0 / (upem * 0.7))
+    if scale > 1.0: 
+        scale = 1.0
+        
+    transform = f"translate(12, 48) scale({scale:.4f}, {-scale:.4f})"
+    
+    # Force a safe tuple structure so python never crashes trying to unpack a None object
+    if raw_path is None:
+        return "", transform, cell_w, cell_h, glyph_name
+        
+    return raw_path, transform, cell_w, cell_h, glyph_name
+
+
 
     active_box_w, active_box_h = 48, 48
     if bounds is not None:
