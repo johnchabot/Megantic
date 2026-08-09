@@ -315,10 +315,6 @@ def generate_sprite_sheet(font_path):
     out.append(f'    <text x="0" y="0" class="blueprint-title-main">TYPOGRAPHIC SPECIMEN MATRIX // SYSTEM NAME: {escaped_fontname}</text>')
     out.append(f'    <text x="0" y="12" class="blueprint-title-sub">SOURCE FILE: {escaped_filename} / WORKSPACE: 72px MONOSPACED MODULES / MATRIX SCALE RATIO: 1:12 / RESOLVED ASSETS: {len(glyphs_data)}</text>')
     out.append('  </g>')
-    # === INJECT THE 1:12 METADATA TITLE BLOCK ===
-    out.append('  <!-- Proportional Technical Header Block (Scaled to 12px/6px system rules) -->')
-    out.append('  <g id="blueprint-metadata-header" transform="translate(72, 54)">')
-    escaped_filename = escape_xml_attr(os.path.basename(font_path))
 
 # chunk3
 # This section stores the inline path dictionary database entries inside <defs>, maps out the active character specimen row groups with their proportional metadata labels, commits the stream data array to canada_sprite.svg, and wraps up the main execution block.
