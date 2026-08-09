@@ -104,6 +104,10 @@ def escape_xml_attr(value):
 
 def extract_glyph_with_bounds(font, unicode_map, char, cell_w, cell_h):
 
+
+
+
+    
     # SAFETY CLIP: Automatically resolve any doubled or escaped multi-character strings
     if len(char) > 1:
         char = "\\" if "\\" in char else char[0]
@@ -135,11 +139,21 @@ def extract_glyph_with_bounds(font, unicode_map, char, cell_w, cell_h):
         tx = ((cell_w - glyph_w * scale) / 2) - xMin * scale
         ty = ((cell_h - 12 - glyph_h * scale) / 2) + yMax * scale + 6
         return raw_path, f"translate({tx:.2f}, {ty:.2f}) scale({scale:.4f}, {-scale:.4f})", cell_w, cell_h, glyph_name
-
-    upem = font['head'].unitsPerEm
-    scale = min(active_box_w / (upem * 0.7), active_box_h / (upem * 0.7))
-    if scale > 1.0: scale = 1.0
-    return raw_path, f"translate(12, 48) scale({scale:.4f}, {-scale:.4f})", cell_w, cell_h, glyph_name
+    
+        # === PIPELINE-SAFE LEFT-JUSTIFIED EXTRACTION ===
+        upem = font['head'].unitsPerEm
+        active_canvas_h = 48   # Target drawing height for ascender limits
+    
+        # Scale factor maps the font's internal Em square directly to our 48px baseline box
+        scale = active_canvas_h / upem
+    
+        # Anchor the typographic origin (0,0) exactly at X=18 (for margin buffer) and Y=48
+        tx = 18.0
+        ty = 48.0
+    
+        # Invert the font's native bottom-to-top Y-axis into standard SVG top-to-bottom space
+        transform = f"translate({tx:.2f}, {ty:.2f}) scale({scale:.4f}, {-scale:.4f})"
+        return raw_path, transform, cell_w, cell_h, glyph_name
 
 def generate_sprite_sheet(font_path):
     if not os.path.exists(font_path):
@@ -150,9 +164,18 @@ def generate_sprite_sheet(font_path):
     cmap = font.getBestCmap()
     unicode_map = {code: name for code, name in cmap.items()}
 
-    BASE_CELL_W, BASE_CELL_H, label_box_h = 72, 72, 12
-    PAD_BOTTOM, ROW_PAD_LEFT, ROW_PAD_TOP = 12, 72, 72
+    # === RECURSIVE MATRIX LAYOUT CONSTANTS ===
+    GRID_UNIT = 6          # The absolute atomic structural division
+    BASE_CELL_W = 72       # Macro enclosure width pitch (12 * GRID_UNIT)
+    BASE_CELL_H = 72       # Macro enclosure height pitch (12 * GRID_UNIT)
+    label_box_h = 12       # Proportional 1:12 metadata label frame tracking height
+    
+    PAD_RIGHT = 0          # Monospaced columns translate at strict 72-unit intervals
+    PAD_BOTTOM = 12        # Dynamic row vertical safety buffer spacer
+    ROW_PAD_LEFT = 72      # Master canvas outer perimeter frame left offset margin
+    ROW_PAD_TOP = 108      # Master canvas outer perimeter frame top offset margin
 
+    
     glyphs_data = {}
     for char, code in CHARACTER_SET.items():
         path, transform, _, _, glyph_name = extract_glyph_with_bounds(font, unicode_map, char, BASE_CELL_W, BASE_CELL_H)
@@ -183,6 +206,9 @@ def generate_sprite_sheet(font_path):
     total_height += (ROW_PAD_TOP - PAD_BOTTOM)
 
 
+
+
+    
 #CHUNK2 This section handles the generation of your verbose XML stream builder array, the modern light/dark embedded styles, the recursive atomic-unit and macro-enclosure defs, and the automated loop calculations for your cross-cutting 2:1 perimeter ticks.
     # --- VERBOSE XML COMPILATION STREAM WRITER ARRAY ---
     out = []
@@ -196,6 +222,8 @@ def generate_sprite_sheet(font_path):
     out.append('      .atomic-axis { stroke: #2c3539 !important; opacity: 0.35 !important; }')
     out.append('      .macro-axis { stroke: #48565e !important; opacity: 0.55 !important; }')
     out.append('      .perimeter-frame { stroke: #8ba1ad !important; opacity: 0.80 !important; }')
+    out.append('    .blueprint-title-main { font-family: "SF Mono", "Courier New", Courier, monospace; font-size: 12px; font-weight: bold; fill: var(--sublabel-text-color); text-anchor: start; }')
+    out.append('    .blueprint-title-sub { font-family: "SF Mono", "Courier New", Courier, monospace; font-size: 6px; font-weight: 500; fill: var(--sublabel-text-color); opacity: 0.7; text-anchor: start; }')
     out.append('      .tick-mark { stroke: #8ba1ad !important; opacity: 0.65 !important; }')
     out.append('      .glyph-on { fill: #f5f7fa !important; }')
     out.append('      .technical-notation { fill: #94a3b8 !important; }')
@@ -206,22 +234,25 @@ def generate_sprite_sheet(font_path):
     # CORE RECURSIVE LAYOUT DEFINITIONS (IrfanView Safe Fallbacks)
     out.append('  <defs>')
     out.append('    <!-- 1. THE ATOMIC UNIT (Base 6x6 Subdivision Grid) -->')
-    out.append('    <pattern id="atomic-unit" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="translate(72, 72)">')
-    out.append('      <line x1="0" y1="6" x2="6" y2="6" stroke="#a3b8c2" stroke-width="0.3" opacity="0.22" class="atomic-axis"/>')
-    out.append('      <line x1="6" y1="0" x2="6" y2="6" stroke="#a3b8c2" stroke-width="0.3" opacity="0.22" class="atomic-axis"/>')
+    out.append('    <pattern id="atomic-unit" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="translate(72, 108)">')
+    out.append('      <line x1="0" y1="6" x2="6" y2="6" stroke="var(--atomic-axis-color)" stroke-width="0.3" opacity="0.25" class="atomic-axis"/>')
+    out.append('      <line x1="6" y1="0" x2="6" y2="6" stroke="var(--atomic-axis-color)" stroke-width="0.3" opacity="0.25" class="atomic-axis"/>')
     out.append('    </pattern>')
     out.append('')
-    out.append('    <!-- 2. THE MACRO ENCLOSURE (Recursive 72x72 Cartesian Module) -->')
-    out.append('    <pattern id="macro-enclosure" width="72" height="72" patternUnits="userSpaceOnUse" patternTransform="translate(72, 72)">')
+    out.append('    <!-- 2. THE MACRO ENCLOSURE (Recursive 72x72 Cartesian Module with Origin crosshairs) -->')
+    out.append('    <pattern id="macro-enclosure" width="72" height="72" patternUnits="userSpaceOnUse" patternTransform="translate(72, 108)">')
     out.append('      <rect width="72" height="72" fill="url(#atomic-unit)"/>')
-    out.append('      <line x1="0" y1="36" x2="72" y2="36" stroke="#5c727d" stroke-width="0.5" stroke-dasharray="1,2" opacity="0.45" class="macro-axis"/>')
-    out.append('      <line x1="36" y1="0" x2="36" y2="72" stroke="#5c727d" stroke-width="0.5" stroke-dasharray="1,2" opacity="0.45" class="macro-axis"/>')
-    out.append('      <line x1="0" y1="72" x2="72" y2="72" stroke="#5c727d" stroke-width="1.0" opacity="0.40" class="macro-axis"/>')
-    out.append('      <line x1="72" y1="0" x2="72" y2="72" stroke="#5c727d" stroke-width="1.0" opacity="0.40" class="macro-axis"/>')
-    out.append('      <circle cx="0" cy="0" r="0.8" fill="#5c727d" opacity="0.6"/>')
-    out.append('      <circle cx="36" cy="36" r="0.6" fill="#5c727d" opacity="0.4"/>')
+    out.append('      <line x1="0" y1="72" x2="72" y2="72" stroke="var(--macro-axis-color)" stroke-width="0.8" opacity="0.40" class="macro-axis"/>')
+    out.append('      <line x1="72" y1="0" x2="72" y2="72" stroke="var(--macro-axis-color)" stroke-width="0.8" opacity="0.40" class="macro-axis"/>')
+    out.append('')
+    out.append('      <!-- The Technical Blueprint Origin Crosshair Indicators -->')
+    out.append('      <!-- Visualizes true Typographic Origin X=18 and Baseline Y=48 inside every monospaced slot -->')
+    out.append('      <line x1="18" y1="0" x2="18" y2="72" stroke="var(--macro-axis-color)" stroke-width="0.6" stroke-dasharray="2,2" opacity="0.55" class="macro-axis"/>')
+    out.append('      <line x1="0" y1="48" x2="72" y2="48" stroke="var(--macro-axis-color)" stroke-width="0.6" stroke-dasharray="2,2" opacity="0.55" class="macro-axis"/>')
+    out.append('      <circle cx="18" cy="48" r="1.2" fill="var(--macro-axis-color)" opacity="0.7"/>')
     out.append('    </pattern>')
     out.append('  </defs>')
+
 
     # LAYER 1: THE BACKGROUND STRUCTURAL CONSTRUCTION PLANE
     out.append('  <g id="construction-plane">')
