@@ -1,14 +1,18 @@
 #!/usr/bin/env python3
 """
-canada-generator.py (Dark Mode)
+canada-generator.py (FINAL – Complete)
 
 Generates a Canada sprite sheet from a .ttf or .otf font file.
 Features:
-- Auto-scaling to fit 48×48 cells
+- Auto-scaling to fit 48px tall cells
 - Labels (Unicode character) in a 24px box under each glyph
 - Row grouping with metadata
 - Canvas width rounded to nearest multiple of 12
-- Dark background (#2a2e2f) with off-white glyphs and labels (#f0f0f0)
+- 6×6 fine sub‑grid + 24×24 coarse grid (graph paper)
+- Light/dark mode with light-dark()
+- Togglable grid via .hide-grid class
+- Fixed Y-axis flip for correct orientation
+- Top‑left anchoring for consistent glyph placement
 
 Usage:
     python3 canada-generator.py <font.otf|ttf>
@@ -28,7 +32,7 @@ except ImportError:
     sys.exit(1)
 
 # ------------------------------------------------------------------
-# 1. CHARACTER SET & ROWS (unchanged)
+# 1. CHARACTER SET & ROWS
 # ------------------------------------------------------------------
 
 CHARACTER_SET = {
@@ -94,7 +98,7 @@ ROWS = [
 ]
 
 # ------------------------------------------------------------------
-# 2. HELPER FUNCTIONS (unchanged)
+# 2. HELPER FUNCTIONS
 # ------------------------------------------------------------------
 
 def get_group_for_char(char):
@@ -126,7 +130,7 @@ def escape_xml_attr(value):
             .replace("'", "&apos;"))
 
 # ------------------------------------------------------------------
-# 3. GLYPH EXTRACTION WITH AUTO-SCALING (unchanged)
+# 3. GLYPH EXTRACTION WITH AUTO-SCALING
 # ------------------------------------------------------------------
 
 def extract_glyph_with_bounds(font, unicode_map, char, cell_w, cell_h):
@@ -163,15 +167,17 @@ def extract_glyph_with_bounds(font, unicode_map, char, cell_w, cell_h):
         scale = min(avail_w / glyph_w, avail_h / glyph_h)
         if scale > 1.0:
             scale = 1.0
-        cx_cell = cell_w / 2
-        cy_cell = cell_h / 2
-        cx_glyph = (xMin + xMax) / 2
-        cy_glyph = (yMin + yMax) / 2
-        tx = cx_cell - cx_glyph * scale
-        ty = cy_cell - cy_glyph * scale
+
+        # Top-left anchoring
+        TOP_OFFSET = 8
+        LEFT_OFFSET = 2
+        tx = LEFT_OFFSET - xMin * scale
+        ty = TOP_OFFSET + yMax * scale
+
         transform = f"translate({tx:.2f}, {ty:.2f}) scale({scale:.4f}, {-scale:.4f})"
         return raw_path, transform, cell_w, cell_h, glyph_name
 
+    # Fallback for fonts without bounding box (CFF)
     upem = font['head'].unitsPerEm
     est_w = upem * 0.7
     est_h = upem * 0.7
@@ -206,24 +212,20 @@ def generate_sprite_sheet(font_path):
     # CELL DIMENSIONS
     # ------------------------------------------------------------------
 
-# ------------------------------------------------------------------
-# CELL DIMENSIONS (Updated)
-# ------------------------------------------------------------------
+    BASE_CELL_W = 18
+    BASE_CELL_H = 48
+    LABEL_BOX_H = 24
+    PAD_RIGHT = 12
+    PAD_BOTTOM = 6
+    ROW_PAD_LEFT = 24
+    ROW_PAD_TOP = 24
 
-BASE_CELL_W = 18
-BASE_CELL_H = 48
-LABEL_BOX_H = 24
-PAD_RIGHT = 12
-PAD_BOTTOM = 6          # ← updated: 6
-ROW_PAD_LEFT = 24       # ← updated: 24 (2 × 12)
-ROW_PAD_TOP = 24        # ← updated: 24 (2 × 12)
-
-def cell_dimensions(scale):
-    glyph_w = int(BASE_CELL_W * scale)
-    glyph_h = int(BASE_CELL_H * scale)
-    label_h = int(LABEL_BOX_H * scale)
-    total_h = glyph_h + label_h
-    return glyph_w, glyph_h, label_h, total_h
+    def cell_dimensions(scale):
+        glyph_w = int(BASE_CELL_W * scale)
+        glyph_h = int(BASE_CELL_H * scale)
+        label_h = int(LABEL_BOX_H * scale)
+        total_h = glyph_h + label_h
+        return glyph_w, glyph_h, label_h, total_h
 
     # ------------------------------------------------------------------
     # EXTRACT GLYPHS
@@ -299,77 +301,75 @@ def cell_dimensions(scale):
     print(f"Rows: {len(built_rows)}")
 
     # ------------------------------------------------------------------
-    # BUILD SVG – UPDATED COLORS
+    # BUILD SVG – WITH GRAPH PAPER GRID
     # ------------------------------------------------------------------
 
     output = []
     output.append(f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {max_width} {total_height}" width="{max_width}" height="{total_height}">')
 
-    # --- CSS with dark mode colors ---
-# --- CSS with light-dark() and grid toggling ---
-output.append('  <style>')
-output.append('    :root {')
-output.append('      /* Enable light/dark mode detection */')
-output.append('      color-scheme: light dark;')
-output.append('')
-output.append('      /* Background */')
-output.append('      --bg-color: light-dark(#ffffff, #1a1a1a);')
-output.append('')
-output.append('      /* Grid colors (relational opacity) */')
-output.append('      --fine-grid-color: light-dark(#a0a0a0, #4a4a4a);')
-output.append('      --coarse-grid-color: light-dark(#666666, #999999);')
-output.append('      --border-color: light-dark(#333333, #cccccc);')
-output.append('')
-output.append('      /* Grid opacities */')
-output.append('      --fine-opacity: 0.25;')
-output.append('      --coarse-opacity: 0.35;')
-output.append('      --border-opacity: 0.5;')
-output.append('')
-output.append('      /* Glyph and label colors */')
-output.append('      --glyph-color: light-dark(#000000, #f0f0f0);')
-output.append('      --label-color: var(--glyph-color);')
-output.append('')
-output.append('      /* Grid toggling */')
-output.append('      --grid-display: block;')
-output.append('    }')
-output.append('')
-output.append('    /* Toggle grid off */')
-output.append('    .hide-grid { --grid-display: none; }')
-output.append('')
-output.append('    svg { background: var(--bg-color); }')
-output.append('    .glyph-on { fill: var(--glyph-color); }')
-output.append('    .glyph-label { fill: var(--label-color); font-family: "Arial Narrow", "Helvetica Condensed", sans-serif; font-weight: bold; text-anchor: middle; }')
-output.append('')
-output.append('    /* Grid lines container */')
-output.append('    .grid-lines { display: var(--grid-display, block); }')
-output.append('    .grid-line { fill: none; }')
-output.append('  </style>')
+    # --- CSS with light-dark() and grid toggling ---
+    output.append('  <style>')
+    output.append('    :root {')
+    output.append('      /* Enable light/dark mode detection */')
+    output.append('      color-scheme: light dark;')
+    output.append('')
+    output.append('      /* Background */')
+    output.append('      --bg-color: light-dark(#ffffff, #1a1a1a);')
+    output.append('')
+    output.append('      /* Grid colors (relational opacity) */')
+    output.append('      --fine-grid-color: light-dark(#a0a0a0, #4a4a4a);')
+    output.append('      --coarse-grid-color: light-dark(#666666, #999999);')
+    output.append('      --border-color: light-dark(#333333, #cccccc);')
+    output.append('')
+    output.append('      /* Grid opacities */')
+    output.append('      --fine-opacity: 0.25;')
+    output.append('      --coarse-opacity: 0.35;')
+    output.append('      --border-opacity: 0.5;')
+    output.append('')
+    output.append('      /* Glyph and label colors */')
+    output.append('      --glyph-color: light-dark(#000000, #f0f0f0);')
+    output.append('      --label-color: var(--glyph-color);')
+    output.append('')
+    output.append('      /* Grid toggling */')
+    output.append('      --grid-display: block;')
+    output.append('    }')
+    output.append('')
+    output.append('    /* Toggle grid off */')
+    output.append('    .hide-grid { --grid-display: none; }')
+    output.append('')
+    output.append('    svg { background: var(--bg-color); }')
+    output.append('    .glyph-on { fill: var(--glyph-color); }')
+    output.append('    .glyph-label { fill: var(--label-color); font-family: "Arial Narrow", "Helvetica Condensed", sans-serif; font-weight: bold; text-anchor: middle; }')
+    output.append('')
+    output.append('    /* Grid lines container */')
+    output.append('    .grid-lines { display: var(--grid-display, block); }')
+    output.append('    .grid-line { fill: none; }')
+    output.append('  </style>')
 
-# --- GRID PATTERNS ---
-output.append('  <defs>')
-output.append('    <!-- 6×6 fine sub‑grid -->')
-output.append('    <pattern id="fine-grid" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="translate(24, 24)">')
-output.append('      <line x1="0" y1="6" x2="6" y2="6" stroke="var(--fine-grid-color)" stroke-width="0.3" opacity="var(--fine-opacity)"/>')
-output.append('      <line x1="6" y1="0" x2="6" y2="6" stroke="var(--fine-grid-color)" stroke-width="0.3" opacity="var(--fine-opacity)"/>')
-output.append('    </pattern>')
-output.append('')
-output.append('    <!-- 24×24 coarse grid (4 × 6) -->')
-output.append('    <pattern id="coarse-grid" width="24" height="24" patternUnits="userSpaceOnUse" patternTransform="translate(24, 24)">')
-output.append('      <!-- Fine grid fills each coarse cell -->')
-output.append('      <rect width="24" height="24" fill="url(#fine-grid)"/>')
-output.append('      <!-- Coarse grid lines -->')
-output.append('      <line x1="0" y1="24" x2="24" y2="24" stroke="var(--coarse-grid-color)" stroke-width="0.8" opacity="var(--coarse-opacity)"/>')
-output.append('      <line x1="24" y1="0" x2="24" y2="24" stroke="var(--coarse-grid-color)" stroke-width="0.8" opacity="var(--coarse-opacity)"/>')
-output.append('    </pattern>')
-output.append('  </defs>')
+    # --- GRID PATTERNS ---
+    output.append('  <defs>')
+    output.append('    <!-- 6×6 fine sub‑grid -->')
+    output.append('    <pattern id="fine-grid" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="translate(24, 24)">')
+    output.append('      <line x1="0" y1="6" x2="6" y2="6" stroke="var(--fine-grid-color)" stroke-width="0.3" opacity="var(--fine-opacity)"/>')
+    output.append('      <line x1="6" y1="0" x2="6" y2="6" stroke="var(--fine-grid-color)" stroke-width="0.3" opacity="var(--fine-opacity)"/>')
+    output.append('    </pattern>')
+    output.append('')
+    output.append('    <!-- 24×24 coarse grid (4 × 6) -->')
+    output.append('    <pattern id="coarse-grid" width="24" height="24" patternUnits="userSpaceOnUse" patternTransform="translate(24, 24)">')
+    output.append('      <!-- Fine grid fills each coarse cell -->')
+    output.append('      <rect width="24" height="24" fill="url(#fine-grid)"/>')
+    output.append('      <!-- Coarse grid lines -->')
+    output.append('      <line x1="0" y1="24" x2="24" y2="24" stroke="var(--coarse-grid-color)" stroke-width="0.8" opacity="var(--coarse-opacity)"/>')
+    output.append('      <line x1="24" y1="0" x2="24" y2="24" stroke="var(--coarse-grid-color)" stroke-width="0.8" opacity="var(--coarse-opacity)"/>')
+    output.append('    </pattern>')
+    output.append('  </defs>')
 
-# --- BACKGROUND ---
-output.append('  <!-- Graph paper background (togglable via .hide-grid) -->')
-output.append('  <g class="grid-lines">')
-output.append(f'    <rect width="100%" height="100%" fill="url(#coarse-grid)"/>')
-# Canvas border overlay
-output.append(f'    <rect x="0" y="0" width="100%" height="100%" class="grid-line" stroke="var(--border-color)" stroke-width="1" opacity="var(--border-opacity)"/>')
-output.append('  </g>')
+    # --- BACKGROUND (Grid + Border) ---
+    output.append('  <!-- Graph paper background (togglable via .hide-grid) -->')
+    output.append('  <g class="grid-lines">')
+    output.append(f'    <rect width="100%" height="100%" fill="url(#coarse-grid)"/>')
+    output.append(f'    <rect x="0" y="0" width="100%" height="100%" class="grid-line" stroke="var(--border-color)" stroke-width="1" opacity="var(--border-opacity)"/>')
+    output.append('  </g>')
 
     # --- DEFS (glyphs) ---
     output.append('  <defs>')
@@ -414,12 +414,18 @@ output.append('  </g>')
                 font_size = int(label_h * 0.7)
                 output.append(f'    <text class="glyph-label" x="{current_x + cell_w/2}" y="{label_y}" font-size="{font_size}">{escaped_char}</text>')
             else:
-                output.append(f'    <rect x="{current_x}" y="0" width="{cell_w}" height="{cell_h}" fill="none" stroke="#444444" stroke-width="0.5" />')
+                output.append(f'    <rect x="{current_x}" y="0" width="{cell_w}" height="{cell_h}" fill="none" stroke="var(--coarse-grid-color)" stroke-width="0.5" opacity="0.3" />')
                 output.append(f'    <text class="glyph-label" x="{current_x + cell_w/2}" y="{cell_h + label_h*0.6}" font-size="{int(label_h*0.7)}">?</text>')
             current_x += cell_w + PAD_RIGHT
 
         output.append('  </g>')
         current_y += total_h + PAD_BOTTOM
+
+    # --- Footer comment about grid toggling ---
+    output.append('  <!--')
+    output.append('    To hide grid lines, add class="hide-grid" to the <svg> element.')
+    output.append('    Example: <svg class="hide-grid" ...>')
+    output.append('  -->')
 
     output.append('</svg>')
 
@@ -432,7 +438,7 @@ output.append('  </g>')
     print(f"  Canvas: {max_width}×{total_height}")
     print(f"  Cell size: {BASE_CELL_W}×{BASE_CELL_H} (1×)")
     print(f"  Label box: {LABEL_BOX_H}px (1×)")
-    print(f"  Theme: Dark grey background with off-white text")
+    print(f"  Grid: 6×6 fine + 24×24 coarse (toggle with .hide-grid)")
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
