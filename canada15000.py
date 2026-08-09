@@ -307,6 +307,7 @@ def generate_sprite_sheet(font_path):
         current_y += BASE_CELL_H + PAD_BOTTOM
 
     # LAYER 4: PURE SPRITE DATA TRACKS (Printed LAST at the absolute bottom of the file structure)
+    # LAYER 4: PURE SPRITE DATA TRACKS (Printed LAST at the absolute bottom of the file structure)
     out.append('  <g id="typographic-specimen-matrix" transform="translate(72, 108)">')
     current_y = 0
     for group_name, chars in built_rows:
@@ -315,6 +316,7 @@ def generate_sprite_sheet(font_path):
         current_x = 0
         for char in chars:
             code = glyphs_data[char]["code"]
+            # SURGICAL PATCH: Enforce xlink:href to clear the browser cross-origin local file sandbox block
             out.append(f'      <use xlink:href="#canada-{code}" x="{current_x}" y="0"/>')
             current_x += BASE_CELL_W
         out.append('    </g>')
