@@ -254,23 +254,30 @@ def generate_sprite_sheet(font_path):
     out.append('  </defs>')
 
 
-    # LAYER 1: THE BACKGROUND STRUCTURAL CONSTRUCTION PLANE
+    # === COMPILING FRAME LAYER & AUTOMATED NOTCH TICKS ===
     out.append('  <g id="construction-plane">')
     out.append('    <rect width="100%" height="100%" fill="url(#macro-enclosure)"/>')
-    
-    # Trace absolute bounding boundary perimeter frame
     active_w = max_width - 144
-    active_h = total_height - 144
-    out.append(f'    <rect x="72" y="72" width="{active_w}" height="{active_h}" fill="none" stroke="#1e2930" stroke-width="1.2" opacity="0.65" class="perimeter-frame"/>')
+    active_h = total_height - 180
+    out.append(f'    <rect x="72" y="108" width="{active_w}" height="{active_h}" fill="none" stroke-width="1.2" opacity="0.70" class="perimeter-frame"/>')
 
-    # AUTOMATED SYSTEM BORDER TICK COMPILING LOOPS (2:1 Proportional Axis Marks)
+    # Programmatic Loops: Safely outputs discrete cross-cutting border ticks along boundaries (IrfanView Bulletproof)
     for tx in range(72, max_width - 71, 72):
-        out.append(f'    <line x1="{tx}" y1="68" x2="{tx}" y2="76" stroke="#1e2930" stroke-width="1.0" opacity="0.60" class="tick-mark"/>')
-        out.append(f'    <line x1="{tx}" y1="{total_height - 76}" x2="{tx}" y2="{total_height - 68}" stroke="#1e2930" stroke-width="1.0" opacity="0.60" class="tick-mark"/>')
-    for ty in range(72, total_height - 71, 72):
-        out.append(f'    <line x1="68" y1="{ty}" x2="76" y2="{ty}" stroke="#1e2930" stroke-width="1.0" opacity="0.60" class="tick-mark"/>')
-        out.append(f'    <line x1="{max_width - 76}" y1="{ty}" x2="{max_width - 68}" y2="{ty}" stroke="#1e2930" stroke-width="1.0" opacity="0.60" class="tick-mark"/>')
+        out.append(f'    <line x1="{tx}" y1="104" x2="{tx}" y2="112" stroke-width="1.0" opacity="0.65" class="tick-mark"/>')
+        out.append(f'    <line x1="{tx}" y1="{total_height - 76}" x2="{tx}" y2="{total_height - 68}" stroke-width="1.0" opacity="0.65" class="tick-mark"/>')
+    for ty in range(108, total_height - 71, 72):
+        out.append(f'    <line x1="68" y1="{ty}" x2="76" y2="{ty}" stroke-width="1.0" opacity="0.65" class="tick-mark"/>')
+        out.append(f'    <line x1="{max_width - 76}" y1="{ty}" x2="{max_width - 68}" y2="{ty}" stroke-width="1.0" opacity="0.65" class="tick-mark"/>')
     out.append('  </g>')
+
+    # === INJECT THE 1:12 METADATA TITLE BLOCK ===
+    out.append('  <!-- Proportional Technical Header Block (Scaled to 12px/6px system rules) -->')
+    out.append('  <g id="blueprint-metadata-header" transform="translate(72, 54)">')
+    escaped_filename = escape_xml_attr(os.path.basename(font_path))
+    out.append(f'    <text x="0" y="0" class="blueprint-title-main">TYPOGRAPHIC SPECIMEN MATRIX // SOURCE FILE: {escaped_filename}</text>')
+    out.append(f'    <text x="0" y="12" class="blueprint-title-sub">FRAMEWORK: MONOSPACED 72px MODULES / MATRIX SCALE RATIO: 1:12 CORE CALIBRATION / ACTIVE PATH UNITS INGESTED: {len(glyphs_data)}</text>')
+    out.append('  </g>')
+
 
 # chunk3
 # This section stores the inline path dictionary database entries inside <defs>, maps out the active character specimen row groups with their proportional metadata labels, commits the stream data array to canada_sprite.svg, and wraps up the main execution block.
@@ -312,10 +319,10 @@ def generate_sprite_sheet(font_path):
             code = glyphs_data[char]["code"]
             out.append(f'      <use href="#canada-{code}" x="{current_x}" y="0"/>')
             
-            # Place explicit metadata notation text on target character row baseline
+            # Lock the 1:12 metadata string cleanly into a static vertical alignment target
             label_x = current_x + (BASE_CELL_W / 2)
-            label_y = BASE_CELL_H - 4
-            out.append(f'      <text x="{label_x}" y="{label_y}" fill="#475569" class="technical-notation">U+{code:04X}</text>')
+            label_y = BASE_CELL_H - 12
+            out.append(f'      <text x="{label_x}" y="{label_y}" class="technical-notation">U+{code:04X}</text>')
             
             current_x += BASE_CELL_W
 
@@ -337,3 +344,11 @@ if __name__ == "__main__":
         sys.exit(1)
     # Execution entry targets the first command line file path string variable argument index
     generate_sprite_sheet(sys.argv[1])
+
+
+
+
+
+
+
+
