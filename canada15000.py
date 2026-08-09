@@ -106,8 +106,16 @@ def get_group_for_char(char):
         return "Keyboard"
 
 def escape_xml_attr(value):
-    if value is None: return ""
-    return str(value).replace("&", "&amp;").replace('"', "&quot;").replace("<", "&lt;").replace(">", "&gt;").replace("'", "&apos;")
+    if value is None: 
+        return ""
+    # Enforces strict web entity encoding so raw quotes can never leak out and smash your attributes
+    return (str(value)
+            .replace("&", "&amp;")
+            .replace('"', "&quot;")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+            .replace("'", "&apos;"))
+
 
 
 def extract_glyph_with_bounds(font, unicode_map, char, cell_w, cell_h):
