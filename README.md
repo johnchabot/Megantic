@@ -1,9 +1,12 @@
 # Megantic
-## High-Density Typographic Matrix Generator Recombuboluation Engine
-cross-format digital font converter and transcompiler. You are intercepting scalable vector geometries and raw bitmap sets, distilling them down to their purest mathematical states, and compiling them into highly compressed, performance-critical retro hardware formats.
+## High-Density Typographic Matrix Generator Recombuboluation Engine  
 ✔️ INPUT: Distill old one-of-a-kind and retro typefaces (.SVG, .OFT, .BIN)  
 ✔️ RECONBOBULATE: Decompile, extract, taxonomize, and legally compress in Run-Length Compression Encoding (RLE)   
 ✔️ PRESERVE: Human-Readable, hand-sewn, highly efficient sprite (.SVG)  
+
+✔️ professional typographic taxonomy, enforces recursive grid definitions, adds intersection coordinate marks, and incorporates coordinate axis labels—all while remaining completely compatible with IrfanView  
+✔️ cross-format digital font converter and transcompiler. You are intercepting scalable vector geometries and raw bitmap sets, distilling them down to their purest mathematical states, and compiling them into highly compressed, performance-critical retro hardware formats.
+
 
 ## Mies-inspired code, human readable  
 * Rebuild in a highly-efficient, light-weight, , performance-critical way  
