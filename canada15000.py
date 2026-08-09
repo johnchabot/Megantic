@@ -103,53 +103,53 @@ def escape_xml_attr(value):
     return str(value).replace("&", "&amp;").replace('"', "&quot;").replace("<", "&lt;").replace(">", "&gt;").replace("'", "&apos;")
 
 
+
+
 def extract_glyph_with_bounds(font, unicode_map, char, cell_w, cell_h):
+    # Safety Interceptor: Automatically resolve multi-character escaping artifacts
     if len(char) > 1: 
         char = "\\" if "\\" in char else char
 
     code = ord(char)
     glyph_name = unicode_map.get(code)
     
-    # === SURGICAL CORRECTION: SAFE TUPLE INTERCEPTORS FOR EARLY EXITS ===
-    if glyph_name is None:
+    # 5-Part Tuple Safeguards: Prevents main engine unpacking loops from panicking on unsupported characters
+    if glyph_name is None: 
+        return None, None, 0, 0, None
+        
+    glyph_set = font.getGlyphSet()
+    if glyph_name not in glyph_set: 
         return None, None, 0, 0, None
 
-    glyph_set = font.getGlyphSet()
-    if glyph_name not in glyph_set:
-        return None, None, 0, 0, None
-    
-    code = ord(char)
-    glyph_name = unicode_map.get(code)
-    if glyph_name is None: return None, None, 0, 0, None
-    glyph_set = font.getGlyphSet()
-    if glyph_name not in glyph_set: return None, None, 0, 0, None
     glyph = glyph_set[glyph_name]
     pen = SVGPathPen(glyph_set)
     glyph.draw(pen)
     raw_path = pen.getCommands()
-    if not raw_path: return "", None, 0, 0, glyph_name
-    try: bounds = glyph.getBounds()
-    except AttributeError: bounds = None
+    
+    # Track empty or whitespace characters safely
+    if not raw_path: 
+        return "", None, 0, 0, glyph_name
 
-    # === SURGICAL CORRECTION: SAFE TUPLE FALLBACK FOR MISSING CHARS ===
+    # === PIPELINE-SAFE LEFT-JUSTIFIED EXTRACTION GRAPH MATH ===
+    # Preserves authentic font spacing metrics for machine ingestion tracking
     try:
         upem = font['head'].unitsPerEm
     except (KeyError, AttributeError):
-        upem = 1000  # Safe font fallback default if metadata is unreadable
-        
-    scale = min(48.0 / (upem * 0.7), 48.0 / (upem * 0.7))
-    if scale > 1.0: 
-        scale = 1.0
-        
-    transform = f"translate(12, 48) scale({scale:.4f}, {-scale:.4f})"
+        upem = 1000  # Standalone fallback limit default if font metadata header is unreadable
+
+    active_canvas_h = 48   # Strict drawing bounds height for character ascender limits
     
-    # Force a safe tuple structure so python never crashes trying to unpack a None object
-    if raw_path is None:
-        return "", transform, cell_w, cell_h, glyph_name
-        
+    # Map the typeface internal Em coordinate framework directly onto our 48px baseline sandbox boundary
+    scale = active_canvas_h / upem
+
+    # Anchor typographic origin (0,0) exactly at X=18 (margin cushion) and Y=48
+    tx = 18.0
+    ty = 48.0
+
+    # Clean inversion matrix rotates the bottom-to-top font layout into top-to-bottom SVG coordinates
+    transform = f"translate({tx:.2f}, {ty:.2f}) scale({scale:.4f}, {-scale:.4f})"
+    
     return raw_path, transform, cell_w, cell_h, glyph_name
-
-
 
     active_box_w, active_box_h = 48, 48
     if bounds is not None:
