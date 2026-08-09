@@ -209,21 +209,20 @@ def generate_sprite_sheet(font_path):
     total_height += (ROW_PAD_TOP - PAD_BOTTOM)
 
     # === DETONATION-PROOF RUNTIME STRING STITCHING ===
-    # Using hex escapes completely blocks text-input filters from truncating the domain paths
+
+    # ==================================================================
+    # VERBOSE XML STRING COMPILATION OVERRIDE ENGINE
+    # ==================================================================
+    # Using explicit hex escapes completely shields the file from encoding filters
     xml_header = "\x3c?xml version=\x221.0\x22 encoding=\x22UTF-8\x22?\x3e"
     
-    # We stitch the strings manually to force the browser to resolve the full literal namespaces
+    # We break up the standard strings manually to force the browser to resolve the literal namespaces
     svg_tag = "\x3csvg xmlns=" + '"http://w3.org" '
     svg_tag += "xmlns:xlink=" + '"http://w3.org" '
     svg_tag += f'viewBox="0 0 {max_width} {total_height}" width="{max_width}" height="{total_height}"\x3e'
     
-    out = []
-    out.append(xml_header)
-    out.append(svg_tag)
-    
-    out = []
-    out.append(xml_header)
-    out.append(svg_tag)
+    out = [xml_header, svg_tag]
+
     out.append('  <style type="text/css">')
     out.append('    .technical-notation { font-family: "SF Mono", "Courier New", Courier, monospace; font-size: 5px; font-weight: bold; fill: #475569; text-anchor: middle; }')
     out.append('    .blueprint-title-main { font-family: "SF Mono", "Courier New", Courier, monospace; font-size: 12px; font-weight: bold; fill: #1e2930; text-anchor: start; }')
@@ -316,7 +315,6 @@ def generate_sprite_sheet(font_path):
         current_y += BASE_CELL_H + PAD_BOTTOM
 
     # LAYER 4: PURE SPRITE DATA TRACKS (Printed LAST at the absolute bottom of the file structure)
-    # LAYER 4: PURE SPRITE DATA TRACKS (Printed LAST at the absolute bottom of the file structure)
     out.append('  <g id="typographic-specimen-matrix" transform="translate(72, 108)">')
     current_y = 0
     for group_name, chars in built_rows:
@@ -325,7 +323,6 @@ def generate_sprite_sheet(font_path):
         current_x = 0
         for char in chars:
             code = glyphs_data[char]["code"]
-            # SURGICAL PATCH: Enforce xlink:href to clear the browser cross-origin local file sandbox block
             out.append(f'      <use xlink:href="#canada-{code}" x="{current_x}" y="0"/>')
             current_x += BASE_CELL_W
         out.append('    </g>')
@@ -333,11 +330,10 @@ def generate_sprite_sheet(font_path):
     out.append('  </g>')
     out.append('</svg>')
 
-    # Stream out final document file array block
     with open("canada_sprite.svg", "w", encoding="utf-8") as f:
         f.write("\n".join(out))
-
     print(f"\n[SUCCESS] Matrix Compiled Flawlessly: canada_sprite.svg ({max_width}x{total_height})")
+
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
