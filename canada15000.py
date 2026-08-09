@@ -230,7 +230,7 @@ def generate_sprite_sheet(font_path):
     # === DETONATION-PROOF RUNTIME STRING STITCHING ===
     xml_header = "<?xml version=" + '"1.0" ' + 'encoding="UTF-8"?>'
     
-    # We break up the strings manually so the script cannot truncate the domain names
+    # === VERIFY SVG TAG NAMESPACES ARE LITERAL ===
     svg_tag = "<svg xmlns=" + '"http://w3.org" '
     svg_tag += "xmlns:xlink=" + '"http://w3.org" '
     svg_tag += f'viewBox="0 0 {max_width} {total_height}" width="{max_width}" height="{total_height}">'
