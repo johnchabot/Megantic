@@ -236,8 +236,10 @@ def generate_sprite_sheet(font_path):
 
     # --- VERBOSE XML COMPILATION STREAM GENERATOR ---
     out = []
+    # === REPAIRED FULL BLUEPRINT CANVAS HEADERS ===
     out.append('<?xml version="1.0" encoding="UTF-8"?>')
     out.append(f'<svg xmlns="http://w3.org" xmlns:xlink="http://w3.org" viewBox="0 0 {max_width} {total_height}" width="{max_width}" height="{total_height}">')
+
     
     # CSS Custom Theme Injector (Browser responsive overrides)
     out.append('  <style type="text/css">')
