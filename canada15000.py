@@ -209,20 +209,17 @@ def generate_sprite_sheet(font_path):
     total_height += (ROW_PAD_TOP - PAD_BOTTOM)
 
 
-
-    # === REPAIRED DETONATION-PROOF RUNTIME STITCHING OVRERIDE ===
-    # Hardcodes the XML delimiters using raw hex characters to completely block text-input truncation filters
-    xml_header = "\x3c?xml version=\x221.0\x22 encoding=\x22UTF-8\x22?\x3e"
+    # === REPAIRED CANVAS HEADERS ASSEMBLY ===
+    xml_header = "<?xml version=" + '"1.0" ' + 'encoding="UTF-8"?>'
     
-    # We break up the standard strings manually to force the browser to resolve the full literal namespaces
-    svg_tag = "\x3csvg xmlns=" + '"http://w3.org" '
-    svg_tag += "xmlns:xlink=" + '"http://w3.org" '
-    svg_tag += f'viewBox="0 0 {max_width} {total_height}" width="{max_width}" height="{total_height}"\x3e'
+    # Restoring the explicit www.w3.org namespaces clears the browser gatekeeper locks permanently
+    svg_tag = "<svg xmlns=" + '"http://www.w3.org/2000/svg" '
+    svg_tag += "xmlns:xlink=" + '"http://www.w3.org/1999/xlink" '
+    svg_tag += f'viewBox="0 0 {max_width} {total_height}" width="{max_width}" height="{total_height}">'
     
     out = []
     out.append(xml_header)
     out.append(svg_tag)
-
     out.append('  <style type="text/css">')
     out.append('    .technical-notation { font-family: "SF Mono", "Courier New", Courier, monospace; font-size: 5px; font-weight: bold; fill: #475569; text-anchor: middle; }')
     out.append('    .blueprint-title-main { font-family: "SF Mono", "Courier New", Courier, monospace; font-size: 12px; font-weight: bold; fill: #1e2930; text-anchor: start; }')
