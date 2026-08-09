@@ -301,9 +301,11 @@ def generate_sprite_sheet(font_path):
 
     # === MICRO-PATCH: INJECT DYNAMIC BLUEPRINT TITLE HEADER ===
     # === REPAIRED METADATA HEADER ASSEMBLY ===
+    # === REPAIRED METADATA HEADER ASSEMBLY ===
     internal_font_name = "Alternative Custom Typeface"
     try:
-        full_name_record = font['name'].getName(4, 3, 1, 0x409) or font['name'].getName(4, 1, 0, 0)
+        name_table = font['name']
+        full_name_record = name_table.getName(4, 3, 1, 0x409) or name_table.getName(4, 1, 0, 0)
         if full_name_record:
             internal_font_name = full_name_record.toUnicode()
     except Exception:
@@ -316,6 +318,7 @@ def generate_sprite_sheet(font_path):
     out.append(f'    <text x="0" y="0" class="blueprint-title-main">TYPOGRAPHIC SPECIMEN MATRIX // SYSTEM NAME: {escaped_fontname}</text>')
     out.append(f'    <text x="0" y="12" class="blueprint-title-sub">SOURCE FILE: {escaped_filename} / WORKSPACE: 72px MONOSPACED MODULES / MATRIX SCALE RATIO: 1:12 / RESOLVED ASSETS: {len(glyphs_data)}</text>')
     out.append('  </g>')
+
 
   
     # === INJECT THE 1:12 METADATA TITLE BLOCK ===
