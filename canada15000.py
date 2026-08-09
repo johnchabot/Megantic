@@ -102,14 +102,21 @@ def escape_xml_attr(value):
     if value is None: return ""
     return str(value).replace("&", "&amp;").replace('"', "&quot;").replace("<", "&lt;").replace(">", "&gt;").replace("'", "&apos;")
 
+
 def extract_glyph_with_bounds(font, unicode_map, char, cell_w, cell_h):
-    
-    # SAFETY CLIP: Automatically resolve any doubled or escaped multi-character strings
-    if len(char) > 1:
-        char = "\\" if "\\" in char else char[0]
+    if len(char) > 1: 
+        char = "\\" if "\\" in char else char
 
     code = ord(char)
     glyph_name = unicode_map.get(code)
+    
+    # === SURGICAL CORRECTION: SAFE TUPLE INTERCEPTORS FOR EARLY EXITS ===
+    if glyph_name is None:
+        return None, None, 0, 0, None
+
+    glyph_set = font.getGlyphSet()
+    if glyph_name not in glyph_set:
+        return None, None, 0, 0, None
     
     code = ord(char)
     glyph_name = unicode_map.get(code)
