@@ -11,7 +11,11 @@
 
 ## APPLICATION OF 1,000 FACES ##
 
-
+| Rank | Languages |
+|-----:|-----------|
+|     1| JavaScript|
+|     2| Python    |
+|     3| SQL       |
 
  
 ## RETRO FONTS ##
