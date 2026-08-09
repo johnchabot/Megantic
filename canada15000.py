@@ -322,10 +322,6 @@ def generate_sprite_sheet(font_path):
     out.append('  </g>')
     out.append('</svg>')
 
-    with open("canada_sprite.svg", "w", encoding="utf-8") as f:
-        f.write("\n".join(out))
-    print(f"\n[SUCCESS] Matrix Compiled Flawlessly: canada_sprite.svg ({max_width}x{total_height})")
-
     # Stream out final document file array block
     with open("canada_sprite.svg", "w", encoding="utf-8") as f:
         f.write("\n".join(out))
