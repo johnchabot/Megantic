@@ -95,6 +95,14 @@ def escape_xml_attr(value):
     return str(value).replace("&", "&amp;").replace('"', "&quot;").replace("<", "&lt;").replace(">", "&gt;").replace("'", "&apos;")
 
 def extract_glyph_with_bounds(font, unicode_map, char, cell_w, cell_h):
+
+    # SAFETY CLIP: Automatically resolve any doubled or escaped multi-character strings
+    if len(char) > 1:
+        char = "\\" if "\\" in char else char[0]
+
+    code = ord(char)
+    glyph_name = unicode_map.get(code)
+    
     code = ord(char)
     glyph_name = unicode_map.get(code)
     if glyph_name is None: return None, None, 0, 0, None
