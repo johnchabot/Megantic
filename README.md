@@ -1,5 +1,5 @@
 # The Megantic Text Generator
-
+Structural translator, taking fluid vector artwork, compressing it into legacy hardware bitstreams, and then upscaling it into a clean, modern blueprint sheet.
 
 ## Hybrid typographic compilation pipeline low-level software engineering project
 ## Recombobulates fonts across eras
