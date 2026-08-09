@@ -17,6 +17,11 @@
     * : 8x16   
     * CANADA1500:   
 * Optional: 2
+* The Background Construction Grid (Pattern Blocks): Your background still uses a two-tier nested pattern structure (atomic-unit nesting inside macro-enclosure).
+* Spatial Positioning (Deterministic Translate): The main row engine is anchored inside a parent group wrapper (transform="translate(72, 72)") to handle your sheet margins safely.
+* The 72-unit System Layout Constants: The baseline layout pitch is locked at 72 units, and rows track at matching multiples.
+* Hardcoded Values are No Longer a Pain Point: The layout boundaries, line paths, and overall document envelope scale programmatically through your python loop calculations.
+* 
 
 ### Typeface Options
 
