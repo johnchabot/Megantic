@@ -1,6 +1,27 @@
 # The Megantic Text Generator
 
-highly systematic asset compiler. It directly extracts vector glyph curves out of font binaries and spaces them along row paths using standard structural parameters.
+Hybrid typographic compilation pipeline low-level software engineering project
+
+* cross-format font converter, transcompiler across eras in computer graphics: the deterministic, pixel-locked world of legacy hardware and the continuous coordinate spaces of modern vector engines.
+* Recompile extracted vector glyph curves into standard structural parameters.
+* Classic Rasterization, Extraction, and Compression (RLE) Pipeline.*
+
+# Here is how that look stacks up from a high-level engineering view:  
+
+FONT INPUTS
+- Intentionally-architected mies intercepting scalable vector geometries
+raw bitmap sets
+.oft decompiled
+
+ENGINE
+distilling them down to their purest mathematical states, 
+compiling them into highly compressed, performance-critical retro hardware formats.
+
+OPTIONAL
+low-co2
+"2:1 cartesian control plane"
+
+# FONTS
 
 1. Megantic
 - segment-based vector font system where each glyph is constructed from a 45‑bit "recipe" of geometric shards
