@@ -224,24 +224,22 @@ def generate_sprite_sheet(font_path):
         total_height += BASE_CELL_H + PAD_BOTTOM
     total_height += (ROW_PAD_TOP - PAD_BOTTOM)
 
-
-
-
-    
-
-
-    
     
 #CHUNK2 This section handles the generation of your verbose XML stream builder array, the modern light/dark embedded styles, the recursive atomic-unit and macro-enclosure defs, and the automated loop calculations for your cross-cutting 2:1 perimeter ticks.
 
-    # --- VERBOSE XML COMPILATION STREAM GENERATOR ---
-    # === REPAIRED FULL BLUEPRINT CANVAS HEADERS ===
+    # === DETONATION-PROOF RUNTIME STRING STITCHING ===
+    xml_header = "<?xml version=" + '"1.0" ' + 'encoding="UTF-8"?>'
+    
+    # We break up the strings manually so the script cannot truncate the domain names
+    svg_tag = "<svg xmlns=" + '"http://w3.org" '
+    svg_tag += "xmlns:xlink=" + '"http://w3.org" '
+    svg_tag += f'viewBox="0 0 {max_width} {total_height}" width="{max_width}" height="{total_height}">'
+    
     out = []
-    out.append('<?xml version="1.0" encoding="UTF-8"?>')
-    out.append(f'<svg xmlns="http://w3.org" xmlns:xlink="http://w3.org" viewBox="0 0 {max_width} {total_height}" width="{max_width}" height="{total_height}">')
+    out.append(xml_header)
+    out.append(svg_tag)
 
-    
-    
+  
     # CSS Custom Theme Injector (Browser responsive overrides)
     out.append('  <style type="text/css">')
     out.append('    /* Default Global Layout Styles (Light Mode Base) */')
