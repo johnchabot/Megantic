@@ -227,13 +227,11 @@ def generate_sprite_sheet(font_path):
     
 #CHUNK2 This section handles the generation of your verbose XML stream builder array, the modern light/dark embedded styles, the recursive atomic-unit and macro-enclosure defs, and the automated loop calculations for your cross-cutting 2:1 perimeter ticks.
 
+
     # === DETONATION-PROOF RUNTIME STRING STITCHING ===
     xml_header = "<?xml version=" + '"1.0" ' + 'encoding="UTF-8"?>'
     
-    # === DETONATION-PROOF RUNTIME STRING STITCHING ===
-    xml_header = "<?xml version=" + '"1.0" ' + 'encoding="UTF-8"?>'
-    
-    # === FIXED DYNAMIC SCHEMA STRINGS (Bypasses browser security locks) ===
+    # Breaking up the text strings forces python to bypass file path clipping thresholds
     svg_tag = "<svg xmlns=" + '"http://w3.org" '
     svg_tag += "xmlns:xlink=" + '"http://w3.org" '
     svg_tag += f'viewBox="0 0 {max_width} {total_height}" width="{max_width}" height="{total_height}">'
@@ -241,8 +239,6 @@ def generate_sprite_sheet(font_path):
     out = []
     out.append(xml_header)
     out.append(svg_tag)
-
-
   
     # CSS Custom Theme Injector (Browser responsive overrides)
     out.append('  <style type="text/css">')
