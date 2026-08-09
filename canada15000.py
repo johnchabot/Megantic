@@ -225,8 +225,6 @@ def generate_sprite_sheet(font_path):
     total_height += (ROW_PAD_TOP - PAD_BOTTOM)
 
 
-
-
     
 #CHUNK2 This section handles the generation of your verbose XML stream builder array, the modern light/dark embedded styles, the recursive atomic-unit and macro-enclosure defs, and the automated loop calculations for your cross-cutting 2:1 perimeter ticks.
     # --- VERBOSE XML COMPILATION STREAM WRITER ARRAY ---
@@ -236,18 +234,22 @@ def generate_sprite_sheet(font_path):
     
     # Inline Stylesheet Overrides Layer (Modern Web Browser Theme Engines)
     out.append('  <style type="text/css">')
+    out.append('    /* Default Global Layout Styles (Light Mode Base) */')
+    out.append('    .technical-notation { font-family: "SF Mono", "Courier New", Courier, monospace; font-size: 5px; font-weight: bold; fill: #475569; text-anchor: middle; }')
+    out.append('    .blueprint-title-main { font-family: "SF Mono", "Courier New", Courier, monospace; font-size: 12px; font-weight: bold; fill: #1e2930; text-anchor: start; }')
+    out.append('    .blueprint-title-sub { font-family: "SF Mono", "Courier New", Courier, monospace; font-size: 6px; font-weight: 500; fill: #475569; opacity: 0.7; text-anchor: start; }')
+    out.append('')
     out.append('    @media (prefers-color-scheme: dark) {')
     out.append('      svg { background: #161a1d !important; }')
     out.append('      .atomic-axis { stroke: #2c3539 !important; opacity: 0.35 !important; }')
     out.append('      .macro-axis { stroke: #48565e !important; opacity: 0.55 !important; }')
     out.append('      .perimeter-frame { stroke: #8ba1ad !important; opacity: 0.80 !important; }')
-    out.append('      .blueprint-title-main { font-family: "SF Mono", "Courier New", Courier, monospace; font-size: 12px; font-weight: bold; fill: var(--sublabel-text-color); text-anchor: start; }')
-    out.append('      .blueprint-title-sub { font-family: "SF Mono", "Courier New", Courier, monospace; font-size: 6px; font-weight: 500; fill: var(--sublabel-text-color); opacity: 0.7; text-anchor: start; }')
     out.append('      .tick-mark { stroke: #8ba1ad !important; opacity: 0.65 !important; }')
     out.append('      .glyph-on { fill: #f5f7fa !important; }')
     out.append('      .technical-notation { fill: #94a3b8 !important; }')
+    out.append('      .blueprint-title-main { fill: #94a3b8 !important; }')
+    out.append('      .blueprint-title-sub { fill: #64748b !important; }')
     out.append('    }')
-    out.append('    .technical-notation { font-family: "SF Mono", "Courier New", Courier, monospace; font-size: 6px; font-weight: 500; text-anchor: middle; }')
     out.append('  </style>')
 
     # CORE RECURSIVE LAYOUT DEFINITIONS (IrfanView Safe Fallbacks)
