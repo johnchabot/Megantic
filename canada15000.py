@@ -225,14 +225,21 @@ def generate_sprite_sheet(font_path):
     total_height += (ROW_PAD_TOP - PAD_BOTTOM)
 
 
+
+
+    
+
+
+    
     
 #CHUNK2 This section handles the generation of your verbose XML stream builder array, the modern light/dark embedded styles, the recursive atomic-unit and macro-enclosure defs, and the automated loop calculations for your cross-cutting 2:1 perimeter ticks.
-    # --- VERBOSE XML COMPILATION STREAM WRITER ARRAY ---
+
+    # --- VERBOSE XML COMPILATION STREAM GENERATOR ---
     out = []
     out.append('<?xml version="1.0" encoding="UTF-8"?>')
     out.append(f'<svg xmlns="http://w3.org" xmlns:xlink="http://w3.org" viewBox="0 0 {max_width} {total_height}" width="{max_width}" height="{total_height}">')
-  
-    # Inline Stylesheet Overrides Layer (Modern Web Browser Theme Engines)
+    
+    # CSS Custom Theme Injector (Browser responsive overrides)
     out.append('  <style type="text/css">')
     out.append('    /* Default Global Layout Styles (Light Mode Base) */')
     out.append('    .technical-notation { font-family: "SF Mono", "Courier New", Courier, monospace; font-size: 5px; font-weight: bold; fill: #475569; text-anchor: middle; }')
