@@ -231,7 +231,7 @@ def generate_sprite_sheet(font_path):
     out = []
     out.append('<?xml version="1.0" encoding="UTF-8"?>')
     out.append(f'<svg xmlns="http://w3.org" xmlns:xlink="http://w3.org" viewBox="0 0 {max_width} {total_height}" width="{max_width}" height="{total_height}">')
-    
+  
     # Inline Stylesheet Overrides Layer (Modern Web Browser Theme Engines)
     out.append('  <style type="text/css">')
     out.append('    /* Default Global Layout Styles (Light Mode Base) */')
