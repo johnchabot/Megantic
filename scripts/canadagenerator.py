@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 """
-canada-generator.py (with auto-scaling)
+canada-generator.py (with auto-scaling & robust font handling)
 
 Generates a Canada sprite sheet from a .ttf or .otf font file.
 Glyphs are automatically scaled to fit the 18×39 cells.
+
+Handles both TTF (glyf table) and OTF (CFF table) fonts.
+Fixes: getHead() → font['head'], getBounds() fallback.
 
 Usage:
     python3 canada-generator.py <font.otf|ttf>
@@ -12,13 +15,10 @@ Output: canada_sprite.svg
 
 import sys
 import os
-import math
 
 try:
     from fontTools.ttLib import TTFont
     from fontTools.pens.svgPathPen import SVGPathPen
-    from fontTools.pens.transformPen import TransformPen
-    from fontTools.misc.transform import Identity
     FONTTOOLS_AVAILABLE = True
 except ImportError:
     FONTTOOLS_AVAILABLE = False
@@ -26,7 +26,7 @@ except ImportError:
     sys.exit(1)
 
 # ------------------------------------------------------------------
-# 1. CHARACTER SET (Unicode code points) – same as before
+# 1. CHARACTER SET (Unicode code points)
 # ------------------------------------------------------------------
 
 CHARACTER_SET = {
@@ -215,7 +215,7 @@ CHARACTER_SET = {
 }
 
 # ------------------------------------------------------------------
-# 2. ROWS CONFIGURATION (same as before)
+# 2. ROWS CONFIGURATION
 # ------------------------------------------------------------------
 
 ROWS = [
@@ -234,7 +234,7 @@ ROWS = [
 ]
 
 # ------------------------------------------------------------------
-# 3. GROUP MAPPING (same as before)
+# 3. HELPER FUNCTIONS
 # ------------------------------------------------------------------
 
 def get_group_for_char(char):
@@ -266,14 +266,10 @@ def escape_xml_attr(value):
             .replace("'", "&apos;"))
 
 # ------------------------------------------------------------------
-# 4. GLYPH EXTRACTION WITH AUTO-SCALING
+# 4. GLYPH EXTRACTION WITH AUTO-SCALING (fixed for OTF/CFF)
 # ------------------------------------------------------------------
 
-def extract_glyph_with_bounds(font, unicode_map, char, cell_w, cell_h, scale_factor=1.0):
-    """
-    Extract the glyph path and compute a transform to fit it inside the cell.
-    Returns a tuple: (path_string, transform_string, width, height)
-    """
+def extract_glyph_with_bounds(font, unicode_map, char, cell_w, cell_h):
     code = ord(char)
     glyph_name = unicode_map.get(code)
     if glyph_name is None:
@@ -283,69 +279,59 @@ def extract_glyph_with_bounds(font, unicode_map, char, cell_w, cell_h, scale_fac
     if glyph_name not in glyph_set:
         return None, None, 0, 0
 
-    # Get the raw path (in font units)
     glyph = glyph_set[glyph_name]
     pen = SVGPathPen(glyph_set)
     glyph.draw(pen)
     raw_path = pen.getCommands()
     if not raw_path:
-        # Empty glyph (like space)
+        # Empty glyph (like space) – return empty path with no transform
         return "", None, 0, 0
 
-    # Get bounding box from the font
-    # For TTF glyf tables: use glyph.getBounds()
-    # For CFF fonts, we may need to compute bounds from the path (fallback)
-    bounds = glyph.getBounds() if hasattr(glyph, 'getBounds') else None
+    # Try to get bounding box from the glyph (works for TTF; may fail for OTF/CFF)
+    try:
+        bounds = glyph.getBounds()
+    except AttributeError:
+        bounds = None
+
+    # If we have bounds, use them for precise scaling and centering
     if bounds is not None:
         xMin, yMin, xMax, yMax = bounds
-        glyph_width = xMax - xMin
-        glyph_height = yMax - yMin
-    else:
-        # Fallback: approximate from path string (crude)
-        # For simplicity, we'll assume a standard em size of 1000 or 2048
-        # This is not ideal; we'll use the font's unitsPerEm as a fallback
-        upem = font.getHead().unitsPerEm
-        # Assume glyph covers roughly 70% of em height (typical)
-        glyph_width = upem * 0.7
-        glyph_height = upem * 0.7
-        xMin, yMin = 0, 0
-        # Note: this is a hack; better to compute bounds from path using a library
-        # But for now, we'll rely on getBounds for TTF, and for CFF we'll approximate.
-        # Since your font is OTF (CFF), we need to handle it.
-        # We'll use a simpler approach: compute the path's bounding box via a custom parser.
-        # Instead of that complexity, we'll use a uniform scaling based on cell size relative to UPEM.
-        # We'll set a fixed scale factor: cell_w / upem * 0.8 (so glyph fills ~80% of cell)
-        scale = (cell_w / upem) * 0.8
-        # We'll apply the scale to the path directly and ignore bounding box centering.
-        # This is a compromise but works for many fonts.
-        return raw_path, f"scale({scale})", cell_w, cell_h
+        glyph_w = xMax - xMin
+        glyph_h = yMax - yMin
+        if glyph_w <= 0 or glyph_h <= 0:
+            # Degenerate glyph – skip or fallback
+            return raw_path, None, cell_w, cell_h
+        margin = 0.1
+        avail_w = cell_w * (1 - 2 * margin)
+        avail_h = cell_h * (1 - 2 * margin)
+        scale = min(avail_w / glyph_w, avail_h / glyph_h)
+        # Clamp to avoid scaling up too much (max 1.0)
+        if scale > 1.0:
+            scale = 1.0
+        # Center the glyph within the cell
+        cx_cell = cell_w / 2
+        cy_cell = cell_h / 2
+        cx_glyph = (xMin + xMax) / 2
+        cy_glyph = (yMin + yMax) / 2
+        tx = cx_cell - cx_glyph * scale
+        ty = cy_cell - cy_glyph * scale
+        transform = f"translate({tx:.2f}, {ty:.2f}) scale({scale:.4f})"
+        return raw_path, transform, cell_w, cell_h
 
-    # Calculate scale to fit inside the cell with some margin (80% of cell)
-    margin = 0.1  # 10% margin inside the cell
-    available_w = cell_w * (1 - 2 * margin)
-    available_h = cell_h * (1 - 2 * margin)
-    scale = min(available_w / glyph_width, available_h / glyph_height)
-    # Ensure we don't scale up too much (avoid clipping)
-    if scale > 1:
-        scale = 1  # Keep original size if it already fits
-
-    # Center the glyph
-    # Compute the offset so that the glyph's bounding box is centered in the cell
-    # The cell's coordinate system: origin at (0,0), width=cell_w, height=cell_h
-    # We want the glyph's bounding box to be centered.
-    cx_cell = cell_w / 2
-    cy_cell = cell_h / 2
-    cx_glyph = (xMin + xMax) / 2
-    cy_glyph = (yMin + yMax) / 2
-    # The translate should move the glyph's center to the cell's center
-    tx = cx_cell - cx_glyph * scale
-    ty = cy_cell - cy_glyph * scale
-
-    transform_str = f"translate({tx:.2f}, {ty:.2f}) scale({scale:.4f})"
-    return raw_path, transform_str, cell_w, cell_h
+    # Fallback for fonts without bounding box (CFF)
+    upem = font['head'].unitsPerEm
+    # Estimate glyph size based on em square (assume ~70% of em)
+    est_w = upem * 0.7
+    est_h = upem * 0.7
+    scale = min(cell_w / est_w, cell_h / est_h)
+    if scale > 1.0:
+        scale = 1.0
+    # No centering; just scale from origin (0,0)
+    transform = f"scale({scale:.4f})"
+    return raw_path, transform, cell_w, cell_h
 
 # ------------------------------------------------------------------
-# 5. SVG GENERATOR (with scaling)
+# 5. SVG GENERATOR
 # ------------------------------------------------------------------
 
 def generate_sprite_sheet(font_path):
@@ -359,11 +345,14 @@ def generate_sprite_sheet(font_path):
     unicode_map = {code: name for code, name in cmap.items()}
     print(f"✓ Found {len(unicode_map)} Unicode mappings")
 
-    # Font units per em (used for fallback scaling)
-    upem = font.getHead().unitsPerEm
+    # Get UPEM (safe method)
+    try:
+        upem = font['head'].unitsPerEm
+    except KeyError:
+        upem = 1000  # fallback
     print(f"✓ Font UPEM: {upem}")
 
-    # Base cell dimensions (1×)
+    # Base cell dimensions
     BASE_CELL_W = 18
     BASE_CELL_H = 39
     PAD_RIGHT = 12
@@ -374,10 +363,10 @@ def generate_sprite_sheet(font_path):
     def cell_dimensions(scale):
         return (int(BASE_CELL_W * scale), int(BASE_CELL_H * scale))
 
-    # Extract all glyphs with scaling
+    # Extract all glyphs
     glyphs_data = {}
     for char, code in CHARACTER_SET.items():
-        # Determine which scale factor applies to this character (from ROWS)
+        # Determine scale for this character (from ROWS)
         cell_scale = 1.0
         for _, chars, s in ROWS:
             if char in chars:
@@ -456,17 +445,16 @@ def generate_sprite_sheet(font_path):
         output.append(f'    <!-- Glyph: "{escaped_char}" (U+{code:04X}) -->')
         output.append(f'    <g id="canada-{code}" data-index="{code}" data-group="{escaped_group}" data-name="{escaped_char}">')
         if path and transform:
-            # Apply both translation and scaling
             output.append(f'      <g transform="{transform}">')
             output.append(f'        <path d="{escaped_path}" class="glyph-on"/>')
             output.append('      </g>')
         elif path:
-            # No transform needed (should not happen)
+            # Should not happen for valid glyphs
             output.append(f'      <path d="{escaped_path}" class="glyph-on"/>')
         output.append('    </g>')
     output.append('  </defs>')
 
-    # Layout
+    # Layout (row grouping)
     output.append('  <!-- Sprite Sheet Layout: Row-based grouping -->')
     current_y = ROW_PAD_TOP
     for group_name, chars, scale in built_rows:
