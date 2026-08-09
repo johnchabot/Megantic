@@ -28,7 +28,7 @@ low-co2
 - 45-Segment Structural Expressivist Addressable Display matrix  
 - Pan-Latin Heavy Transit Matrix  
   
-2. IBM PC CP437 SVG Sprite  
+2.  Reconstructing IBM PC CP437 (The DRAW Engine in VGA): Old binary into a SVG Sprite  
 - Emit a single path command per run: M{x},{y}h{width}.
 
     If two runs are vertically adjacent and have the same x and width, the script does not merge them (to keep generation simple and the path commands straightforward). However, the path string is still dramatically smaller than <rect> tags because each run is just Mx,yhw instead of <rect x="..." y="..." width="..." height="..."/>.
