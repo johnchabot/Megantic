@@ -1,36 +1,28 @@
 # Megantic
 
-## Font Recombombulator (H2)
-Mies-inspired, typographic decompilation, extraction, Refactoring/Compressing, .SVG output pipeline
-Mash up the deterministic, pixel-locked world of last millennium, even older cartesian coordinate planes, with modern vectors goodness
- Intentionally-architected mies intercepting scalable vector geometries
-### Subsection Header (H3)
-* Teleport typefaces from legacy retro digital eras (Safely and ethically)
-* Recombobulates, Derasterization, Tweaks like: Run-Length Compression Encoding (RLE) 
+## Mies-inspired Typographic Era Timewarp
+✔️ INPUT: Distill old one-of-a-kind and retro typefaces (.SVG, .OFT, .BIN)
+✔️ RECONBOBULATE: Decompile, extract, taxonomize, and legally compress in Run-Length Compression Encoding (RLE) 
+✔️ PRESERVE: Human-Readable, hand-sewn, highly efficient sprite (.SVG)
+
+### Subsection Header
+* Rebuild in a highly-efficient, light-weight, , performance-critical way
+* co2-friendly Encodes  RLL-encoded single <SVG> path command: M{x},{y}h{width}
 * Outputs in human-readable, simple, and efficient vector (.SVG) goodness
-* 
-* Second main bullet point
-    * Indented sub-bullet point (use 4 spaces or 1 tab to indent)
-    * Another sub-bullet point
-* Third main bullet point
+* Fonts:
+    * MEGANTIC: 45-Segment Pan-Latin, Structural Expressivist, Display Matrix (SVG to SVG)
+    * CP437: 8x16 TheDRAW Engine (BIN to SVG), Anything you'd normally want to see in ASCII extendami
+    * CANADA1500: Canada's 1500th Birthday Font (OFT to SVG), Okanagan Cherry-picks of the best glyphs
+* Optional: 2D Cartesian Control Plane with a 6x6 grid on a 2:1 format
 
-
-## INPUT ##
-✔️files
-
-## ENGINE ##
-✔️ Distill fonts to pure mathematical goodness
-✔️ Rebuild in a highly-efficient, light-weight, co2-friendly, performance-critical way
-
-## OUTPUT ##
-✔️ .SVG Typeface Sprites in clean, consistenthuman-readable, XML goodness
-✔️ Optional: 2D Cartesian Control Plane with a 6x6 grid on a 2:1 format
+### Cool options
+✔️ 
 
 | Font | Languages |
 |-----:|-----------|
-|     Megantic|  (SVG to SVG)  segment-based vector font system where each glyph is constructed from a 45‑bit "recipe" of geometric shards // 45-Segment Structural Expressivist Addressable Display matrix // Pan-Latin Heavy Transit Matrix |
-|     TheDRAW Engine| (BIN to SVG) Hand-stitches bitmap into RLL-encoded single <SVG> path command: M{x},{y}h{width}.   |
-|     Canada15000| (OFT to SVG) Okanagan Cherry-picks the best glyphs into a cool Sprite
+|     Megantic|  
+|     |  Hand-stitches bitmap into RLL-encoded single <SVG> path command: M{x},{y}h{width}.   |
+|     Canada15000| Okanagan Cherry-picks the best glyphs into a cool Sprite
 |
 
 It combines your custom character matrix arrays, the uniform 72-unit Monospaced Workspace Architecture, automated 2:1 cross-cutting perimeter tick calculations, and native XML presentation attributes to make the output document completely safe for legacy tools like IrfanView.
