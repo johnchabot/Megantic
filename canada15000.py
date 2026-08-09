@@ -260,28 +260,25 @@ def generate_sprite_sheet(font_path):
     out.append('  </style>')
 
 
-    # CORE RECURSIVE LAYOUT DEFINITIONS (IrfanView Safe Fallbacks)
-    # RECURSIVE CARTESIAN SYSTEM BACKGROUND ARCHITECTURE
+    # === OPERATION 1: UN-STRETCHED 6x6 CONTROL PLANE PATTERNS ===
     out.append('  <defs>')
-    out.append('    <!-- 1. THE ATOMIC UNIT (Base 6x6 Subdivision Grid) -->')
-    out.append('    <pattern id="atomic-unit" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="translate(72, 108)">')
+    out.append('    <!-- 1. THE ATOMIC UNIT (Base 6x6 Subdivision Grid Mesh) -->')
+    out.append('    <pattern id="atomic-unit" width="6" height="6" patternUnits="userSpaceOnUse" class="control-plane">')
     out.append('      <line x1="0" y1="6" x2="6" y2="6" stroke="#a3b8c2" stroke-width="0.3" opacity="0.22" class="atomic-axis"/>')
     out.append('      <line x1="6" y1="0" x2="6" y2="6" stroke="#a3b8c2" stroke-width="0.3" opacity="0.22" class="atomic-axis"/>')
     out.append('    </pattern>')
-    out.append('    <!-- 2. THE MACRO ENCLOSURE (Recursive 72x72 Cartesian Module with Origin crosshairs) -->')
-    out.append('    <pattern id="macro-enclosure" width="72" height="72" patternUnits="userSpaceOnUse" patternTransform="translate(72, 108)">')
+    out.append('')
+    out.append('    <!-- 2. THE MACRO ENCLOSURE (Recursive 72x72 Cartesian Module Viewport) -->')
+    out.append('    <pattern id="macro-enclosure" width="72" height="72" patternUnits="userSpaceOnUse" class="control-plane">')
     out.append('      <rect width="72" height="72" fill="url(#atomic-unit)"/>')
     out.append('      <line x1="0" y1="72" x2="72" y2="72" stroke="#5c727d" stroke-width="0.8" opacity="0.40" class="macro-axis"/>')
     out.append('      <line x1="72" y1="0" x2="72" y2="72" stroke="#5c727d" stroke-width="0.8" opacity="0.40" class="macro-axis"/>')
-    out.append('      <!-- Blueprint Technical Crosshairs: Intersects at Typographic Origin X=18 and Baseline Y=18 -->')
-    out.append('      <line x1="18" y1="0" x2="18" y2="72" stroke="#5c727d" stroke-width="0.6" stroke-dasharray="1,2" opacity="0.50" class="macro-axis"/>')
-    out.append('      <line x1="0" y1="18" x2="72" y2="18" stroke="#5c727d" stroke-width="0.6" stroke-dasharray="1,2" opacity="0.50" class="macro-axis"/>')
-    out.append('      <circle cx="18" cy="18" r="1.0" fill="#5c727d" opacity="0.6"/>')
     out.append('    </pattern>')
     out.append('  </defs>')
 
     # LAYER 1: BACKDROP PLANE & HARDCODED PERIMETER FRAME LOOPS (IrfanView Safe)
-    out.append('  <g id="construction-plane">')
+    # Added the class tracker to link your blueprint background to your CSS on/off toggle
+    out.append('  <g id="construction-plane" class="control-plane">')
     out.append('    <rect width="100%" height="100%" fill="url(#macro-enclosure)"/>')
     active_w = max_width - 144
     active_h = total_height - 180
@@ -298,6 +295,7 @@ def generate_sprite_sheet(font_path):
 
 
     # === REPAIRED METADATA HEADER ASSEMBLY ===
+
     internal_font_name = "Alternative Custom Typeface"
     try:
         name_table = font['name']
