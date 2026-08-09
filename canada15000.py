@@ -111,51 +111,39 @@ def escape_xml_attr(value):
 
 
 def extract_glyph_with_bounds(font, unicode_map, char, cell_w, cell_h):
-    # Safety Interceptor: Automatically resolve multi-character escaping artifacts
     if len(char) > 1: 
         char = "\\" if "\\" in char else char
 
     code = ord(char)
     glyph_name = unicode_map.get(code)
     
-    # 5-Part Tuple Safeguards: Prevents main engine unpacking loops from panicking on unsupported characters
-    if glyph_name is None: 
-        return None, None, 0, 0, None
-        
+    if glyph_name is None: return None, None, 0, 0, None
     glyph_set = font.getGlyphSet()
-    if glyph_name not in glyph_set: 
-        return None, None, 0, 0, None
+    if glyph_name not in glyph_set: return None, None, 0, 0, None
 
     glyph = glyph_set[glyph_name]
     pen = SVGPathPen(glyph_set)
     glyph.draw(pen)
     raw_path = pen.getCommands()
     
-    # Track empty or whitespace characters safely
-    if not raw_path: 
-        return "", None, 0, 0, glyph_name
+    if not raw_path: return "", None, 0, 0, glyph_name
 
-    # === PIPELINE-SAFE LEFT-JUSTIFIED EXTRACTION GRAPH MATH ===
-    # Preserves authentic font spacing metrics for machine ingestion tracking
     try:
         upem = font['head'].unitsPerEm
     except (KeyError, AttributeError):
-        upem = 1000  # Standalone fallback limit default if font metadata header is unreadable
+        upem = 1000
 
-    active_canvas_h = 48   # Strict drawing bounds height for character ascender limits
-    
-    # Map the typeface internal Em coordinate framework directly onto our 48px baseline sandbox boundary
-    scale = active_canvas_h / upem
+    # Scale the font's internal Em square to fit a maximum width boundary of 60px (5 grid blocks)
+    max_active_w = 60.0
+    scale = max_active_w / upem
 
-    # Anchor typographic origin (0,0) exactly at X=18 (margin cushion) and Y=18
-    # This pulls the alternative glyph vectors cleanly up to the top-left ceiling of the modules
-    tx = 18.0
-    ty = 18.0
+    # Anchor typographic origin (0,0) exactly at X=12 and Y=72 inside the cell box
+    tx = 12.0
+    ty = 72.0
 
-    # Clean inversion matrix rotates the bottom-to-top font layout into top-to-bottom SVG coordinates
     transform = f"translate({tx:.2f}, {ty:.2f}) scale({scale:.4f}, {-scale:.4f})"
-    
     return raw_path, transform, cell_w, cell_h, glyph_name
+
 
 
 def generate_sprite_sheet(font_path):
@@ -167,38 +155,27 @@ def generate_sprite_sheet(font_path):
     cmap = font.getBestCmap()
     unicode_map = {code: name for code, name in cmap.items()}
 
-    # === MICRO-PATCH: 12-GRID BLUEPRINT LAYOUT CONSTANTS ===
-    GRID_UNIT = 6          # The absolute atomic structural division
-    BASE_CELL_W = 72       # Macro enclosure width pitch (12 * GRID_UNIT)
-    BASE_CELL_H = 72       # Macro enclosure height pitch (12 * GRID_UNIT)
-    label_box_h = 12       # Proportional 1:12 metadata label tracking height
+    # === DYNAMIC-LINKED 12-GRID UNIFORM WORKSPACE CONSTANTS ===
+    GRID_UNIT = 12         # Grid line interval changed to 12 for a bigger, clearer 6x6 mesh
+    BASE_CELL_W = 72       # Monospace cell module width (6 grid blocks wide)
+    BASE_CELL_H = 96       # Monospace cell module height (8 grid blocks high: 6 glyph + 2 label)
+    label_box_h = 24       # Dedicated footer box lane height for dual-line annotations
     
-    PAD_RIGHT = 0          # Monospaced columns step strictly at 72 intervals
-    PAD_BOTTOM = 24        # Vertical cushion padding between row sets
-    ROW_PAD_LEFT = 72      # Canvas outer frame left margin offset width
-    ROW_PAD_TOP = 108      # Canvas outer frame top margin offset height
-
-
-        # === SURGICAL SAFETNET PATCH ===
+    PAD_RIGHT = 0          
+    PAD_BOTTOM = 36        # Deep cushion padding between separate row sets prevents crowding
+    ROW_PAD_LEFT = 72      # Master canvas outer perimeter frame left offset margin
+    ROW_PAD_TOP = 144      # Master canvas outer perimeter frame top offset margin
 
     glyphs_data = {}
-
     for char, code in CHARACTER_SET.items():
         res = extract_glyph_with_bounds(font, unicode_map, char, BASE_CELL_W, BASE_CELL_H)
-        
-        # Verify we received a safe, unpackable 5-part data sequence
         if res is None or not isinstance(res, tuple) or len(res) < 5:
             continue
-            
-        # Bypass direct variable unpacking to eliminate NoneType crashing
-        if res[0] is not None and res[0] != "":
+        path, transform, _, _, glyph_name = res
+        if path is not None:
             glyphs_data[char] = {
-                "char": char,
-                "code": code,
-                "path": res[0],
-                "transform": res[1],
-                "group": get_group_for_char(char),
-                "glyph_name": res[4],
+                "char": char, "code": code, "path": path, "transform": transform,
+                "group": get_group_for_char(char), "glyph_name": glyph_name if glyph_name else "glyph"
             }
 
     built_rows = []
@@ -213,39 +190,28 @@ def generate_sprite_sheet(font_path):
     max_width = 0
     for _, chars in built_rows:
         w = ROW_PAD_LEFT + len(chars) * BASE_CELL_W + ROW_PAD_LEFT
-        # FIXED: This block is now perfectly indented inside the tracking iteration loop!
-        if w > max_width:
-            max_width = w
+        if w > max_width: max_width = w
             
     max_width = ((max_width + 11) // 12) * 12
 
+    # Calculate overall document height using our alternating 96px row module rhythms
     total_height = ROW_PAD_TOP
-    for _, _ in built_rows:
+    for _, chars in built_rows:
         total_height += BASE_CELL_H + PAD_BOTTOM
     total_height += (ROW_PAD_TOP - PAD_BOTTOM)
 
-    
-#CHUNK2 This section handles the generation of your verbose XML stream builder array, the modern light/dark embedded styles, the recursive atomic-unit and macro-enclosure defs, and the automated loop calculations for your cross-cutting 2:1 perimeter ticks.
-
-    # === DETONATION-PROOF RUNTIME STRING STITCHING ===
+    # --- VERBOSE XML STRING COMPILATION STREAM WRITER ---
     xml_header = "<?xml version=" + '"1.0" ' + 'encoding="UTF-8"?>'
-    
-    # We break up the strings manually so the script cannot truncate the domain names
-    svg_tag = "<svg xmlns=" + '"http://www.w3.org/2000/svg" '
-    svg_tag += "xmlns:xlink=" + '"http://www.w3.org/1999/xlink" '
+    svg_tag = "<svg xmlns=" + '"http://w3.org" '
+    svg_tag += "xmlns:xlink=" + '"http://w3.org" '
     svg_tag += f'viewBox="0 0 {max_width} {total_height}" width="{max_width}" height="{total_height}">'
     
-    out = []
-    out.append(xml_header)
-    out.append(svg_tag)
-  
-    # CSS Custom Theme Injector (Browser responsive overrides)
+    out = [xml_header, svg_tag]
+
     out.append('  <style type="text/css">')
-    out.append('    /* Default Global Layout Styles (Light Mode Base) */')
     out.append('    .technical-notation { font-family: "SF Mono", "Courier New", Courier, monospace; font-size: 5px; font-weight: bold; fill: #475569; text-anchor: middle; }')
     out.append('    .blueprint-title-main { font-family: "SF Mono", "Courier New", Courier, monospace; font-size: 12px; font-weight: bold; fill: #1e2930; text-anchor: start; }')
     out.append('    .blueprint-title-sub { font-family: "SF Mono", "Courier New", Courier, monospace; font-size: 6px; font-weight: 500; fill: #475569; opacity: 0.7; text-anchor: start; }')
-    out.append('')
     out.append('    @media (prefers-color-scheme: dark) {')
     out.append('      svg { background: #161a1d !important; }')
     out.append('      .atomic-axis { stroke: #2c3539 !important; opacity: 0.35 !important; }')
@@ -259,98 +225,85 @@ def generate_sprite_sheet(font_path):
     out.append('    }')
     out.append('  </style>')
 
-
-    # === OPERATION 1: UN-STRETCHED 6x6 CONTROL PLANE PATTERNS ===
     out.append('  <defs>')
-    out.append('    <!-- 1. THE ATOMIC UNIT (Base 6x6 Subdivision Grid Mesh) -->')
-    out.append('    <pattern id="atomic-unit" width="6" height="6" patternUnits="userSpaceOnUse" class="control-plane">')
-    out.append('      <line x1="0" y1="6" x2="6" y2="6" stroke="#a3b8c2" stroke-width="0.3" opacity="0.22" class="atomic-axis"/>')
-    out.append('      <line x1="6" y1="0" x2="6" y2="6" stroke="#a3b8c2" stroke-width="0.3" opacity="0.22" class="atomic-axis"/>')
-    out.append('    </pattern>')
-    out.append('')
-    out.append('    <!-- 2. THE MACRO ENCLOSURE (Recursive 72x72 Cartesian Module Viewport) -->')
-    out.append('    <pattern id="macro-enclosure" width="72" height="72" patternUnits="userSpaceOnUse" class="control-plane">')
-    out.append('      <rect width="72" height="72" fill="url(#atomic-unit)"/>')
-    out.append('      <line x1="0" y1="72" x2="72" y2="72" stroke="#5c727d" stroke-width="0.8" opacity="0.40" class="macro-axis"/>')
-    out.append('      <line x1="72" y1="0" x2="72" y2="72" stroke="#5c727d" stroke-width="0.8" opacity="0.40" class="macro-axis"/>')
+    out.append('    <!-- Sharp un-stretched graph paper: 12px increments frame a clean 6x6 grid across cells -->')
+    out.append('    <pattern id="macro-enclosure" width="12" height="12" patternUnits="userSpaceOnUse" class="control-plane">')
+    out.append('      <line x1="0" y1="12" x2="12" y2="12" stroke="#5c727d" stroke-width="0.4" opacity="0.25" class="atomic-axis"/>')
+    out.append('      <line x1="12" y1="0" x2="12" y2="12" stroke="#5c727d" stroke-width="0.4" opacity="0.25" class="atomic-axis"/>')
     out.append('    </pattern>')
     out.append('  </defs>')
 
-    # LAYER 1: BACKDROP PLANE & HARDCODED PERIMETER FRAME LOOPS (IrfanView Safe)
-    # Added the class tracker to link your blueprint background to your CSS on/off toggle
+    # LAYER 1: BACKDROP CONTROL PLANE GRID (Dotted lines and center dot removed)
     out.append('  <g id="construction-plane" class="control-plane">')
     out.append('    <rect width="100%" height="100%" fill="url(#macro-enclosure)"/>')
     active_w = max_width - 144
-    active_h = total_height - 180
+    active_h = total_height - 216
     out.append(f'    <rect x="72" y="108" width="{active_w}" height="{active_h}" fill="none" stroke="#1e2930" stroke-width="1.2" opacity="0.65" class="perimeter-frame"/>')
 
-    # Programmatic Loops: Safely outputs discrete cross-cutting border ticks along boundaries
+    # Programmatic Loops: Outward-Only perimeter notches (start at border line and draw outwards)
     for tx in range(72, max_width - 71, 72):
-        out.append(f'    <line x1="{tx}" y1="104" x2="{tx}" y2="112" stroke="#1e2930" stroke-width="1.0" opacity="0.65" class="tick-mark"/>')
-        out.append(f'    <line x1="{tx}" y1="{total_height - 76}" x2="{tx}" y2="{total_height - 68}" stroke="#1e2930" stroke-width="1.0" opacity="0.65" class="tick-mark"/>')
-    for ty in range(108, total_height - 71, 72):
-        out.append(f'    <line x1="68" y1="{ty}" x2="76" y2="{ty}" stroke="#1e2930" stroke-width="1.0" opacity="0.65" class="tick-mark"/>')
-        out.append(f'    <line x1="{max_width - 76}" y1="{ty}" x2="{max_width - 68}" y2="{ty}" stroke="#1e2930" stroke-width="1.0" opacity="0.65" class="tick-mark"/>')
+        out.append(f'    <line x1="{tx}" y1="100" x2="{tx}" y2="108" stroke="#1e2930" stroke-width="1.0" opacity="0.65" class="tick-mark"/>')
+        out.append(f'    <line x1="{tx}" y1="{total_height - 108}" x2="{tx}" y2="{total_height - 100}" stroke="#1e2930" stroke-width="1.0" opacity="0.65" class="tick-mark"/>')
+    for ty in range(108, total_height - 107, 72):
+        out.append(f'    <line x1="64" y1="{ty}" x2="72" y2="{ty}" stroke="#1e2930" stroke-width="1.0" opacity="0.65" class="tick-mark"/>')
+        out.append(f'    <line x1="{max_width - 72}" y1="{ty}" x2="{max_width - 64}" y2="{ty}" stroke="#1e2930" stroke-width="1.0" opacity="0.65" class="tick-mark"/>')
     out.append('  </g>')
-
-
-    # === REPAIRED METADATA HEADER ASSEMBLY ===
 
     internal_font_name = "Alternative Custom Typeface"
     try:
         name_table = font['name']
         full_name_record = name_table.getName(4, 3, 1, 0x409) or name_table.getName(4, 1, 0, 0)
-        if full_name_record:
-            internal_font_name = full_name_record.toUnicode()
-    except Exception:
-        pass
+        if full_name_record: internal_font_name = full_name_record.toUnicode()
+    except Exception: pass
 
-    # === SURGICAL FIX: HEADER HEIGHT SHIFT ===
-    out.append('  <!-- Proportional Engineering Title Block (12px/6px system rules) -->')
-    # Change the Y value from 54 to 36 to slide the text safely up into the top padding zone
-    out.append('  <g id="blueprint-metadata-header" transform="translate(72, 36)">')
+    # TITLE METADATA BLOCK ASSEMBLY (Floats safely above our Y = 108 top perimeter border line)
+    out.append('  <g id="blueprint-metadata-header" transform="translate(72, 54)">')
     escaped_filename = escape_xml_attr(os.path.basename(font_path))
     escaped_fontname = escape_xml_attr(internal_font_name)
     out.append(f'    <text x="0" y="0" class="blueprint-title-main">TYPOGRAPHIC SPECIMEN MATRIX // SYSTEM NAME: {escaped_fontname}</text>')
-    out.append(f'    <text x="0" y="12" class="blueprint-title-sub">SOURCE FILE: {escaped_filename} / WORKSPACE: 72px MONOSPACED MODULES / MATRIX SCALE RATIO: 1:12 / RESOLVED ASSETS: {len(glyphs_data)}</text>')
+    out.append(f'    <text x="0" y="12" class="blueprint-title-sub">SOURCE FILE: {escaped_filename} / WORKSPACE: MONOSPACED 72px MODULES / CODES RESOLVED: {len(glyphs_data)}</text>')
     out.append('  </g>')
 
-
-# chunk3
-# This section stores the inline path dictionary database entries inside <defs>, maps out the active character specimen row groups with their proportional metadata labels, commits the stream data array to canada_sprite.svg, and wraps up the main execution block.
-
-    # DEFS ARCHIVE DICTIONARY: INDEPENDENT DATA GLYPH BLOCKS STORAGE
     out.append('  <defs>')
     for char, data in glyphs_data.items():
         code = data["code"]
         path = data["path"]
         group = data["group"]
         transform = data["transform"]
-        
         escaped_char = escape_xml_attr(char)
         escaped_group = escape_xml_attr(group)
         escaped_path = escape_xml_attr(path)
-        out.append(f'    <!-- Vector Database Entry: "{escaped_char}" (U+{code:04X}) -->')
         out.append(f'    <g id="canada-{code}" data-index="{code}" data-group="{escaped_group}" data-name="{escaped_char}">')
         if path and transform:
-            out.append(f'      <g transform="{transform}">')
-            out.append(f'        <path d="{escaped_path}" fill="#000000" class="glyph-on"/>')
-            out.append('      </g>')
+            out.append(f'      <g transform="{transform}"><path d="{escaped_path}" class="glyph-on"/></g>')
         elif path:
-            out.append(f'      <path d="{escaped_path}" fill="#000000" class="glyph-on"/>')
+            out.append(f'      <path d="{escaped_path}" class="glyph-on"/>')
         out.append('    </g>')
     out.append('  </defs>')
 
-    # === FIXED SPECIMEN WORKSPACE MATRIX STACK ENTRY ===
+    # LAYER 3: ALTERNATING CONTROL PLANE NOTATIONS TRACKS (Tied to the Control Plane visibility class)
+    current_y = 0
+    for group_name, chars in built_rows:
+        row_base_id = f"row-{group_name.replace(' ', '-').replace('(', '').replace(')', '')}"
+        out.append(f'    <g id="{row_base_id}-labels" transform="translate(72, {108 + current_y})" class="control-plane">')
+        current_x = 0
+        for char in chars:
+            code = glyphs_data[char]["code"]
+            friendly_name = glyphs_data[char]["glyph_name"]
+            label_x = current_x + (BASE_CELL_W / 2)
+            
+            # Text notations sit down cleanly inside their separate vertical lanes at the floor of the cell block
+            out.append(f'      <text x="{label_x}" y="82" class="technical-notation">U+{code:04X}</text>')
+            out.append(f'      <text x="{label_x}" y="92" class="technical-notation">{escape_xml_attr(friendly_name)}</text>')
+            current_x += BASE_CELL_W
+        out.append('    </g>')
+        current_y += BASE_CELL_H + PAD_BOTTOM
+
+    # LAYER 4: PURE SPRITE DATA TRACKS (Printed LAST at the absolute bottom of the file structure)
     out.append('  <g id="typographic-specimen-matrix" transform="translate(72, 108)">')
     current_y = 0
-
-    
     for group_name, chars in built_rows:
-        out.append(f'    <!-- SPECIMEN TRACK GROUP: {escape_xml_attr(group_name)} -->')
         row_base_id = f"row-{group_name.replace(' ', '-').replace('(', '').replace(')', '')}"
-        
-        # A. Render the left-justified glyph outlines line
         out.append(f'    <g id="{row_base_id}-glyphs" data-row="{escape_xml_attr(group_name)}" transform="translate(0, {current_y})">')
         current_x = 0
         for char in chars:
@@ -358,26 +311,13 @@ def generate_sprite_sheet(font_path):
             out.append(f'      <use xlink:href="#canada-{code}" x="{current_x}" y="0"/>')
             current_x += BASE_CELL_W
         out.append('    </g>')
-        
-        # B. Render separate dual-notation metadata labels line (Inherits the grid control plane visibility setting)
-        out.append(f'    <g id="{row_base_id}-labels" data-row="{escape_xml_attr(group_name)}" transform="translate(0, {current_y + 60})" class="control-plane">')
-        current_x = 0
-        for char in chars:
-            code = glyphs_data[char]["code"]
-            friendly_name = glyphs_data[char]["glyph_name"]
-            label_x = current_x + (BASE_CELL_W / 2)
-            
-            # Stack Line 1: Standard Hexadecimal Unicode notation (U+XXXX)
-            out.append(f'      <text x="{label_x}" y="-2" class="technical-notation">U+{code:04X}</text>')
-            # Stack Line 2: The True PostScript "Friendly Design Name" string literal
-            out.append(f'      <text x="{label_x}" y="6" class="technical-notation">{escape_xml_attr(friendly_name)}</text>')
-            current_x += BASE_CELL_W
-        out.append('    </g>')
-
         current_y += BASE_CELL_H + PAD_BOTTOM
-        
     out.append('  </g>')
     out.append('</svg>')
+
+    with open("canada_sprite.svg", "w", encoding="utf-8") as f:
+        f.write("\n".join(out))
+    print(f"\n[SUCCESS] Matrix Compiled Flawlessly: canada_sprite.svg ({max_width}x{total_height})")
 
     # Stream out final document file array block
     with open("canada_sprite.svg", "w", encoding="utf-8") as f:
