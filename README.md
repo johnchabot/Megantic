@@ -9,22 +9,21 @@
 * Rebuild in a highly-efficient, light-weight, , performance-critical way
 * co2-friendly Encodes  RLL-encoded single <SVG> path command: M{x},{y}h{width}
 * Outputs in human-readable, simple, and efficient vector (.SVG) goodness
-* Fonts:
-    * MEGANTIC: 45-Segment Pan-Latin, Structural Expressivist, Display Matrix (SVG to SVG)
-    * CP437: 8x16 TheDRAW Engine (BIN to SVG), Anything you'd normally want to see in ASCII extendami
-    * CANADA1500: Canada's 1500th Birthday Font (OFT to SVG), Okanagan Cherry-picks of the best glyphs
-* Optional: 2D Cartesian Control Plane with a 6x6 grid on a 2:1 format
+* Options:
+    * : D Cartesian Control Plane with a 6x6 grid on a 2:1 format
+    * : 8x16 
+    * CANADA1500: 
+* Optional: 2
 
-### Cool options
-✔️ 
+### Typeface Options
 
 | Font | Languages |
 |-----:|-----------|
-|     Megantic|  
-|     |  Hand-stitches bitmap into RLL-encoded single <SVG> path command: M{x},{y}h{width}.   |
-|     Canada15000| Okanagan Cherry-picks the best glyphs into a cool Sprite
+|     MEGANTIC|  45-Segment Pan-Latin, Structural Expressivist, Display Matrix (SVG to SVG) |
+|     CP437| TheDRAW Engine (BIN to SVG), Anything you'd normally want to see in ASCII extendami Hand-stitches bitmap into RLL-encoded single <SVG> path command: M{x},{y}h{width}.   |
+|     CANADA1500| Canada's 1500th Birthday Font (OFT to SVG), Okanagan Cherry-picks of the best glyphs Okanagan Cherry-picks the best glyphs into a cool Sprite |
 |
-
+✔️ 
 It combines your custom character matrix arrays, the uniform 72-unit Monospaced Workspace Architecture, automated 2:1 cross-cutting perimeter tick calculations, and native XML presentation attributes to make the output document completely safe for legacy tools like IrfanView.
 
 ###  .**
