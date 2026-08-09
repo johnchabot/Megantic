@@ -1,38 +1,31 @@
 # The Megantic Text Generator
 
-Hybrid typographic compilation pipeline low-level software engineering project
+## Hybrid typographic compilation pipeline low-level software engineering project
 
 **Thing A** <font color="#FF0000">*</font> **cross-format font converter, transcompiler across eras in computer graphics: the deterministic, pixel-locked world of legacy hardware and the continuous coordinate spaces of modern vector engines.**
 **Thing A** <font color="#FF0000">*</font> **Recompile extracted vector glyph curves into standard structural parameters.**
 **Thing A** <font color="#FF0000">*</font> **Classic Rasterization, Extraction, and Compression (RLE) Pipeline.**
  
-* 
-* Classic Rasterization, Extraction, and Compression (RLE) Pipeline.*
+"Classic Rasterization, Extraction, and Compression (RLE) Pipeline.*
 
 # Here is how that look stacks up from a high-level engineering view:  
-
-FONT INPUTS
+## FONT INPUTS
 - Intentionally-architected mies intercepting scalable vector geometries
 raw bitmap sets
 .oft decompiled
 
-ENGINE
+## ENGINE ##
 distilling them down to their purest mathematical states, 
 compiling them into highly compressed, performance-critical retro hardware formats.
 
-OPTIONAL
+## OPTIONAL ##
 low-co2
 "2:1 cartesian control plane"
 
-# FONTS
-
-1. Megantic
-- segment-based vector font system where each glyph is constructed from a 45‑bit "recipe" of geometric shards
-- 45-Segment Structural Expressivist Addressable Display matrix  
-- Pan-Latin Heavy Transit Matrix  
-  
-2.  Reconstructing IBM PC CP437 (The DRAW Engine in VGA): Old binary into a SVG Sprite  
-- Emit a single path command per run: M{x},{y}h{width}.
+## FONTS ##
+### Megantic ### segment-based vector font system where each glyph is constructed from a 45‑bit "recipe" of geometric shards // 45-Segment Structural Expressivist Addressable Display matrix // Pan-Latin Heavy Transit Matrix  
+### CP437 ### Reconstructing IBM PC CP437 (The DRAW Engine in VGA): Old binary into a SVG Sprite. Emit a single path command per run: M{x},{y}h{width}.
+### CANADA15000 ### Ha
 
     If two runs are vertically adjacent and have the same x and width, the script does not merge them (to keep generation simple and the path commands straightforward). However, the path string is still dramatically smaller than <rect> tags because each run is just Mx,yhw instead of <rect x="..." y="..." width="..." height="..."/>.
 
