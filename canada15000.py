@@ -230,7 +230,10 @@ def generate_sprite_sheet(font_path):
     # === DETONATION-PROOF RUNTIME STRING STITCHING ===
     xml_header = "<?xml version=" + '"1.0" ' + 'encoding="UTF-8"?>'
     
-    # === VERIFY SVG TAG NAMESPACES ARE LITERAL ===
+    # === DETONATION-PROOF RUNTIME STRING STITCHING ===
+    xml_header = "<?xml version=" + '"1.0" ' + 'encoding="UTF-8"?>'
+    
+    # === FIXED DYNAMIC SCHEMA STRINGS (Bypasses browser security locks) ===
     svg_tag = "<svg xmlns=" + '"http://w3.org" '
     svg_tag += "xmlns:xlink=" + '"http://w3.org" '
     svg_tag += f'viewBox="0 0 {max_width} {total_height}" width="{max_width}" height="{total_height}">'
@@ -238,6 +241,7 @@ def generate_sprite_sheet(font_path):
     out = []
     out.append(xml_header)
     out.append(svg_tag)
+
 
   
     # CSS Custom Theme Injector (Browser responsive overrides)
