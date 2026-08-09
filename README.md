@@ -1,5 +1,6 @@
 # Megantic
 ## High-Density Typographic Matrix Generator Recombuboluation Engine
+cross-format digital font converter and transcompiler. You are intercepting scalable vector geometries and raw bitmap sets, distilling them down to their purest mathematical states, and compiling them into highly compressed, performance-critical retro hardware formats.
 ✔️ INPUT: Distill old one-of-a-kind and retro typefaces (.SVG, .OFT, .BIN)  
 ✔️ RECONBOBULATE: Decompile, extract, taxonomize, and legally compress in Run-Length Compression Encoding (RLE)   
 ✔️ PRESERVE: Human-Readable, hand-sewn, highly efficient sprite (.SVG)  
@@ -19,7 +20,7 @@
 | Font | Languages |
 |-----:|-----------|
 |     MEGANTIC|  45-Segment Pan-Latin, Structural Expressivist, Display Matrix (SVG to SVG) |
-|     CP437| TheDRAW Engine (BIN to SVG), Anything you'd normally want to see in ASCII extendami Hand-stitches bitmap into RLL-encoded single <SVG> path command: M{x},{y}h{width}.   |
+|     CP437| TheDRAW Engine (BIN to SVG), Anything you'd normally want to see in ASCII extendami Hand-stitches bitmap into RLL-encoded single <SVG> path command: M{x},{y}h{width}. Reconstructing the VGA PC Font (The DRAW Engine), the Run-Length Limited (RLL) Compression Layer, Vector to Bitmap Rasterization (Downsampling)|
 |     CANADA1500| Canada's 1500th Birthday Font (OFT to SVG), Okanagan Cherry-picks of the best glyphs Okanagan Cherry-picks the best glyphs into a cool Sprite |
 |
 ✔️ 
@@ -42,11 +43,12 @@ Structural Taxonomy Nomenclature Changes: We stepped back from rewriting your cu
 
     If two runs are vertically adjacent and have the same x and width, the script does not merge them (to keep generation simple and the path commands straightforward). However, the path string is still dramatically smaller than <rect> tags because each run is just Mx,yhw instead of <rect x="..." y="..." width="..." height="..."/>.
 
+3. Reconstructing the VGA PC Font (The DRAW Engine)The final stage is the reconstruction. Your engine reads those compressed RLL data tokens and passes them to a custom DRAW subroutine.
 
 Mashup of late-1990s ideas
 - Run-Length Encoding (RLE) with modern geometric clarity.
 
-
+The Run-Length Limited (RLL) Compression LayerOnce a character is flattened into a raw grid of 1s and 0s, storing every individual pixel becomes highly inefficient for retro hardware emulation or microcontrollers. This is where your RLL (Run-Length Limited) encoding engine comes in.
 
  resulting from two entirely different geometric engines that obey a strict Coincident Node Rule
 
