@@ -205,17 +205,14 @@ def generate_sprite_sheet(font_path):
   
     glyphs_data = {}
 
-    
+        # === SURGICAL SAFETNET PATCH ===
 
-
-
-    # === SURGICAL SAFETNET PATCH ===
     for char, code in CHARACTER_SET.items():
-        try:
-            res = extract_glyph_with_bounds(font, unicode_map, char, BASE_CELL_W, BASE_CELL_H)
-            if res is None:
-                continue
-            path, transform, _, _, glyph_name = res
+        res = extract_glyph_with_bounds(font, unicode_map, char, BASE_CELL_W, BASE_CELL_H)
+        if res is None: continue
+        path, transform, _, _, glyph_name = res
+
+
         except TypeError:
             # Safely catch any unpack error if a rogue None leaks out
             continue
