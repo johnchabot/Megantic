@@ -374,7 +374,7 @@ def generate_sprite_sheet(font_path):
         current_x = 0
         for char in chars:
             code = glyphs_data[char]["code"]
-            out.append(f'      <use href="#canada-{code}" x="{current_x}" y="0"/>')
+            out.append(f'      <use xlink:href="#canada-{code}" x="{current_x}" y="0"/>')
             current_x += BASE_CELL_W
         out.append('    </g>')
         
