@@ -167,19 +167,17 @@ def generate_sprite_sheet(font_path):
     cmap = font.getBestCmap()
     unicode_map = {code: name for code, name in cmap.items()}
 
-    # === RECURSIVE MATRIX LAYOUT CONSTANTS ===
+    # === MICRO-PATCH: 12-GRID BLUEPRINT LAYOUT CONSTANTS ===
     GRID_UNIT = 6          # The absolute atomic structural division
     BASE_CELL_W = 72       # Macro enclosure width pitch (12 * GRID_UNIT)
     BASE_CELL_H = 72       # Macro enclosure height pitch (12 * GRID_UNIT)
-    label_box_h = 12       # Proportional 1:12 metadata label frame tracking height
+    label_box_h = 12       # Proportional 1:12 metadata label tracking height
     
-    PAD_RIGHT = 0          # Monospaced columns translate at strict 72-unit intervals
-    PAD_BOTTOM = 12        # Dynamic row vertical safety buffer spacer
-    ROW_PAD_LEFT = 72      # Master canvas outer perimeter frame left offset margin
-    ROW_PAD_TOP = 108      # Master canvas outer perimeter frame top offset margin
+    PAD_RIGHT = 0          # Monospaced columns step strictly at 72 intervals
+    PAD_BOTTOM = 24        # Vertical cushion padding between row sets
+    ROW_PAD_LEFT = 72      # Canvas outer frame left margin offset width
+    ROW_PAD_TOP = 108      # Canvas outer frame top margin offset height
 
-  
- 
 
         # === SURGICAL SAFETNET PATCH ===
 
@@ -291,10 +289,32 @@ def generate_sprite_sheet(font_path):
         out.append(f'    <line x1="{max_width - 76}" y1="{ty}" x2="{max_width - 68}" y2="{ty}" stroke-width="1.0" opacity="0.65" class="tick-mark"/>')
     out.append('  </g>')
 
+
+    # === MICRO-PATCH: INJECT DYNAMIC BLUEPRINT TITLE HEADER ===
+    internal_font_name = "Alternative Custom Typeface"
+    try:
+        full_name_record = font['name'].getName(4, 3, 1, 0x409) or font['name'].getName(4, 1, 0, 0)
+        if full_name_record: internal_font_name = full_name_record.toUnicode()
+    except Exception: pass
+
+    out.append('  <!-- Proportional Engineering Title Block (12px/6px system rules) -->')
+    out.append('  <g id="blueprint-metadata-header" transform="translate(72, 54)">')
+    escaped_filename = escape_xml_attr(os.path.basename(font_path))
+    escaped_fontname = escape_xml_attr(internal_font_name)
+    out.append(f'    <text x="0" y="0" class="blueprint-title-main">TYPOGRAPHIC SPECIMEN MATRIX // SYSTEM NAME: {escaped_fontname}</text>')
+    out.append(f'    <text x="0" y="12" class="blueprint-title-sub">SOURCE FILE: {escaped_filename} / WORKSPACE: 72px MONOSPACED MODULES / MATRIX SCALE RATIO: 1:12 / RESOLVED ASSETS: {len(glyphs_data)}</text>')
+    out.append('  </g>')
+
+  
     # === INJECT THE 1:12 METADATA TITLE BLOCK ===
     out.append('  <!-- Proportional Technical Header Block (Scaled to 12px/6px system rules) -->')
     out.append('  <g id="blueprint-metadata-header" transform="translate(72, 54)">')
     escaped_filename = escape_xml_attr(os.path.basename(font_path))
+
+
+
+
+    
     out.append(f'    <text x="0" y="0" class="blueprint-title-main">TYPOGRAPHIC SPECIMEN MATRIX // SOURCE FILE: {escaped_filename}</text>')
     out.append(f'    <text x="0" y="12" class="blueprint-title-sub">FRAMEWORK: MONOSPACED 72px MODULES / MATRIX SCALE RATIO: 1:12 CORE CALIBRATION / ACTIVE PATH UNITS INGESTED: {len(glyphs_data)}</text>')
     out.append('  </g>')
@@ -329,25 +349,47 @@ def generate_sprite_sheet(font_path):
     # LAYER 2: SYSTEMATIC MONOSPACED GLYPH DISPLAY LAYER
     out.append('  <g id="typographic-specimen-matrix" transform="translate(72, 72)">')
     current_y = 0
+
+
+
     
     for group_name, chars in built_rows:
-        out.append(f'    <!-- Category Sector Stream: {escape_xml_attr(group_name)} -->')
-        row_id_string = f"row-{group_name.replace(' ', '-').replace('(', '').replace(')', '')}"
-        out.append(f'    <g id="{row_id_string}" data-row="{escape_xml_attr(group_name)}" transform="translate(0, {current_y})">')
+    # === MICRO-PATCH: ALTERNATING SPECIMEN WORKSPACE MATRIX STACK ===
+    out.append('  <g id="typographic-specimen-matrix" transform="translate(72, 108)">')
+    current_y = 0
+    
+    for group_name, chars in built_rows:
+        out.append(f'    <!-- SPECIMEN TRACK GROUP: {escape_xml_attr(group_name)} -->')
+        row_base_id = f"row-{group_name.replace(' ', '-').replace('(', '').replace(')', '')}"
         
+        # A. Render the left-justified glyph outlines line
+        out.append(f'    <g id="{row_base_id}-glyphs" data-row="{escape_xml_attr(group_name)}" transform="translate(0, {current_y})">')
         current_x = 0
         for char in chars:
             code = glyphs_data[char]["code"]
             out.append(f'      <use href="#canada-{code}" x="{current_x}" y="0"/>')
-            
-            # Lock the 1:12 metadata string cleanly into a static vertical alignment target
-            label_x = current_x + (BASE_CELL_W / 2)
-            label_y = BASE_CELL_H - 12
-            out.append(f'      <text x="{label_x}" y="{label_y}" class="technical-notation">U+{code:04X}</text>')
-            
             current_x += BASE_CELL_W
-
         out.append('    </g>')
+        
+        # B. Render separate dual-notation metadata labels line (Steps down 60px inside the module)
+        out.append(f'    <g id="{row_base_id}-labels" data-row="{escape_xml_attr(group_name)}" transform="translate(0, {current_y + 60})">')
+        current_x = 0
+        for char in chars:
+            code = glyphs_data[char]["code"]
+            friendly_name = glyphs_data[char]["glyph_name"]
+            label_x = current_x + (BASE_CELL_W / 2)
+            
+            # Stack Line 1: Standard Hexadecimal Unicode notation (U+XXXX)
+            out.append(f'      <text x="{label_x}" y="-2" class="technical-notation">U+{code:04X}</text>')
+            # Stack Line 2: The true PostScript "Friendly Design Name" string literal
+            out.append(f'      <text x="{label_x}" y="6" class="technical-notation">{escape_xml_attr(friendly_name)}</text>')
+            current_x += BASE_CELL_W
+        out.append('    </g>')
+
+        current_y += BASE_CELL_H + PAD_BOTTOM
+        
+    out.append('  </g>')
+
         current_y += BASE_CELL_H + PAD_BOTTOM
         
     out.append('  </g>')
