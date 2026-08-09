@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """
-canada-generator.py (with auto-scaling & robust font handling)
+canada-generator.py (FINAL)
 
 Generates a Canada sprite sheet from a .ttf or .otf font file.
-Glyphs are automatically scaled to fit the 18×39 cells.
-
-Handles both TTF (glyf table) and OTF (CFF table) fonts.
-Fixes: getHead() → font['head'], getBounds() fallback.
+Features:
+- Auto-scaling to fit 18×39 cells
+- Labels (Unicode character) under each glyph
+- Row grouping with metadata
+- Canvas width rounded to nearest multiple of 12
 
 Usage:
     python3 canada-generator.py <font.otf|ttf>
@@ -266,69 +267,67 @@ def escape_xml_attr(value):
             .replace("'", "&apos;"))
 
 # ------------------------------------------------------------------
-# 4. GLYPH EXTRACTION WITH AUTO-SCALING (fixed for OTF/CFF)
+# 4. GLYPH EXTRACTION WITH AUTO-SCALING
 # ------------------------------------------------------------------
 
 def extract_glyph_with_bounds(font, unicode_map, char, cell_w, cell_h):
     code = ord(char)
     glyph_name = unicode_map.get(code)
     if glyph_name is None:
-        return None, None, 0, 0
+        return None, None, 0, 0, None
 
     glyph_set = font.getGlyphSet()
     if glyph_name not in glyph_set:
-        return None, None, 0, 0
+        return None, None, 0, 0, None
 
     glyph = glyph_set[glyph_name]
     pen = SVGPathPen(glyph_set)
     glyph.draw(pen)
     raw_path = pen.getCommands()
     if not raw_path:
-        # Empty glyph (like space) – return empty path with no transform
-        return "", None, 0, 0
+        # Empty glyph (like space) – return empty path
+        return "", None, 0, 0, glyph_name
 
-    # Try to get bounding box from the glyph (works for TTF; may fail for OTF/CFF)
+    # Try to get bounding box
     try:
         bounds = glyph.getBounds()
     except AttributeError:
         bounds = None
 
-    # If we have bounds, use them for precise scaling and centering
     if bounds is not None:
         xMin, yMin, xMax, yMax = bounds
         glyph_w = xMax - xMin
         glyph_h = yMax - yMin
         if glyph_w <= 0 or glyph_h <= 0:
-            # Degenerate glyph – skip or fallback
-            return raw_path, None, cell_w, cell_h
+            return raw_path, None, cell_w, cell_h, glyph_name
         margin = 0.1
         avail_w = cell_w * (1 - 2 * margin)
         avail_h = cell_h * (1 - 2 * margin)
         scale = min(avail_w / glyph_w, avail_h / glyph_h)
-        # Clamp to avoid scaling up too much (max 1.0)
+        # Clamp scale to avoid oversized glyphs
         if scale > 1.0:
             scale = 1.0
-        # Center the glyph within the cell
+        # Center
         cx_cell = cell_w / 2
         cy_cell = cell_h / 2
         cx_glyph = (xMin + xMax) / 2
         cy_glyph = (yMin + yMax) / 2
         tx = cx_cell - cx_glyph * scale
         ty = cy_cell - cy_glyph * scale
-        transform = f"translate({tx:.2f}, {ty:.2f}) scale({scale:.4f})"
-        return raw_path, transform, cell_w, cell_h
+        # Flip Y axis (fix mirror issue)
+        transform = f"translate({tx:.2f}, {ty:.2f}) scale({scale:.4f}, {-scale:.4f})"
+        return raw_path, transform, cell_w, cell_h, glyph_name
 
     # Fallback for fonts without bounding box (CFF)
     upem = font['head'].unitsPerEm
-    # Estimate glyph size based on em square (assume ~70% of em)
     est_w = upem * 0.7
     est_h = upem * 0.7
     scale = min(cell_w / est_w, cell_h / est_h)
     if scale > 1.0:
         scale = 1.0
-    # No centering; just scale from origin (0,0)
-    transform = f"scale({scale:.4f})"
-    return raw_path, transform, cell_w, cell_h
+    # Flip Y axis
+    transform = f"scale({scale:.4f}, {-scale:.4f})"
+    return raw_path, transform, cell_w, cell_h, glyph_name
 
 # ------------------------------------------------------------------
 # 5. SVG GENERATOR
@@ -345,36 +344,41 @@ def generate_sprite_sheet(font_path):
     unicode_map = {code: name for code, name in cmap.items()}
     print(f"✓ Found {len(unicode_map)} Unicode mappings")
 
-    # Get UPEM (safe method)
+    # Get UPEM
     try:
         upem = font['head'].unitsPerEm
     except KeyError:
-        upem = 1000  # fallback
+        upem = 1000
     print(f"✓ Font UPEM: {upem}")
 
-    # Base cell dimensions
+    # Base cell dimensions (1×)
     BASE_CELL_W = 18
     BASE_CELL_H = 39
     PAD_RIGHT = 12
     PAD_BOTTOM = 16
     ROW_PAD_LEFT = 20
     ROW_PAD_TOP = 20
+    LABEL_RATIO = 0.25   # label height = 0.25 * glyph height
 
     def cell_dimensions(scale):
-        return (int(BASE_CELL_W * scale), int(BASE_CELL_H * scale))
+        glyph_w = int(BASE_CELL_W * scale)
+        glyph_h = int(BASE_CELL_H * scale)
+        label_h = int(glyph_h * LABEL_RATIO)
+        total_h = glyph_h + label_h
+        return glyph_w, glyph_h, label_h, total_h
 
     # Extract all glyphs
     glyphs_data = {}
     for char, code in CHARACTER_SET.items():
-        # Determine scale for this character (from ROWS)
         cell_scale = 1.0
         for _, chars, s in ROWS:
             if char in chars:
                 cell_scale = s
                 break
-        cell_w, cell_h = cell_dimensions(cell_scale)
-
-        path, transform, _, _ = extract_glyph_with_bounds(font, unicode_map, char, cell_w, cell_h)
+        cell_w, cell_h, _, _ = cell_dimensions(cell_scale)
+        path, transform, _, _, glyph_name = extract_glyph_with_bounds(
+            font, unicode_map, char, cell_w, cell_h
+        )
         if path is not None:
             glyphs_data[char] = {
                 "char": char,
@@ -382,6 +386,7 @@ def generate_sprite_sheet(font_path):
                 "path": path,
                 "transform": transform,
                 "group": get_group_for_char(char),
+                "glyph_name": glyph_name,
                 "cell_w": cell_w,
                 "cell_h": cell_h,
             }
@@ -407,18 +412,21 @@ def generate_sprite_sheet(font_path):
         print("❌ No rows with characters found!")
         return
 
-    # Calculate canvas size
+    # Calculate canvas size, rounding width to nearest multiple of 12
     max_width = 0
     for _, chars, scale in built_rows:
-        cell_w, _ = cell_dimensions(scale)
+        cell_w, _, _, _ = cell_dimensions(scale)
         w = ROW_PAD_LEFT + len(chars) * (cell_w + PAD_RIGHT)
         if w > max_width:
             max_width = w
 
+    # Round up to next multiple of 12
+    max_width = ((max_width + 11) // 12) * 12
+
     total_height = ROW_PAD_TOP
     for _, _, scale in built_rows:
-        _, cell_h = cell_dimensions(scale)
-        total_height += cell_h + PAD_BOTTOM
+        _, _, _, total_h = cell_dimensions(scale)
+        total_height += total_h + PAD_BOTTOM
 
     print(f"Canvas: {max_width}×{total_height}")
     print(f"Rows: {len(built_rows)}")
@@ -427,52 +435,64 @@ def generate_sprite_sheet(font_path):
     output = []
     output.append(f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {max_width} {total_height}" width="{max_width}" height="{total_height}">')
     output.append('  <style>')
-    output.append('    :root { --bg-color: #ffffff; --glyph-color: #000000; }')
+    output.append('    :root { --bg-color: #ffffff; --glyph-color: #000000; --label-color: #000000; }')
     output.append('    svg { background: var(--bg-color); }')
     output.append('    .glyph-on { fill: var(--glyph-color); }')
+    output.append('    .glyph-label { fill: var(--label-color); font-family: "Arial Narrow", "Helvetica Condensed", sans-serif; font-weight: bold; text-anchor: middle; }')
     output.append('  </style>')
 
+    # Defs: glyphs
     output.append('  <defs>')
     for char, data in glyphs_data.items():
         code = data["code"]
         path = data["path"]
         group = data["group"]
         transform = data["transform"]
+        glyph_name = data["glyph_name"]
         escaped_char = escape_xml_attr(char)
         escaped_group = escape_xml_attr(group)
         escaped_path = escape_xml_attr(path)
+        escaped_glyph_name = escape_xml_attr(glyph_name)
 
-        output.append(f'    <!-- Glyph: "{escaped_char}" (U+{code:04X}) -->')
+        output.append(f'    <!-- Glyph: "{escaped_char}" (U+{code:04X}) glyph: {escaped_glyph_name} -->')
         output.append(f'    <g id="canada-{code}" data-index="{code}" data-group="{escaped_group}" data-name="{escaped_char}">')
         if path and transform:
             output.append(f'      <g transform="{transform}">')
             output.append(f'        <path d="{escaped_path}" class="glyph-on"/>')
             output.append('      </g>')
         elif path:
-            # Should not happen for valid glyphs
             output.append(f'      <path d="{escaped_path}" class="glyph-on"/>')
         output.append('    </g>')
     output.append('  </defs>')
 
-    # Layout (row grouping)
-    output.append('  <!-- Sprite Sheet Layout: Row-based grouping -->')
+    # Layout: rows with labels
+    output.append('  <!-- Sprite Sheet Layout: Row-based grouping with labels -->')
     current_y = ROW_PAD_TOP
     for group_name, chars, scale in built_rows:
         output.append(f'  <!-- ========== ROW: {escape_xml_attr(group_name)} ({len(chars)} chars) scale:{scale} ========== -->')
         row_id = f"row-{group_name.replace(' ', '-').replace('(', '').replace(')', '')}"
         output.append(f'  <g id="{row_id}" data-row="{escape_xml_attr(group_name)}" transform="translate(0, {current_y})">')
         current_x = ROW_PAD_LEFT
-        cell_w, cell_h = cell_dimensions(scale)
+        cell_w, cell_h, label_h, total_h = cell_dimensions(scale)
+
         for char in chars:
             if char in glyphs_data:
                 code = glyphs_data[char]["code"]
                 escaped_char = escape_xml_attr(char)
-                output.append(f'    <use href="#canada-{code}" x="{current_x}" /> <!-- canada-{code} ({escape_xml_attr(group_name)} | {escaped_char}) -->')
+                # Glyph
+                output.append(f'    <use href="#canada-{code}" x="{current_x}" />')
+                # Label under the glyph
+                label_y = cell_h + label_h * 0.6
+                font_size = int(label_h * 0.6)
+                output.append(f'    <text class="glyph-label" x="{current_x + cell_w/2}" y="{label_y}" font-size="{font_size}">{escaped_char}</text>')
             else:
-                output.append(f'    <rect x="{current_x}" y="0" width="{cell_w}" height="{cell_h}" fill="none" stroke="#cccccc" stroke-width="0.5" /> <!-- MISSING: {char} -->')
+                # Missing glyph placeholder
+                output.append(f'    <rect x="{current_x}" y="0" width="{cell_w}" height="{cell_h}" fill="none" stroke="#cccccc" stroke-width="0.5" />')
+                output.append(f'    <text class="glyph-label" x="{current_x + cell_w/2}" y="{cell_h + label_h*0.6}" font-size="{int(label_h*0.6)}">?</text>')
             current_x += cell_w + PAD_RIGHT
+
         output.append('  </g>')
-        current_y += cell_h + PAD_BOTTOM
+        current_y += total_h + PAD_BOTTOM
 
     output.append('</svg>')
 
@@ -484,10 +504,7 @@ def generate_sprite_sheet(font_path):
     print(f"  Total glyphs: {len(glyphs_data)}")
     print(f"  Canvas: {max_width}×{total_height}")
     print(f"  Cell size: {BASE_CELL_W}×{BASE_CELL_H} (1×)")
-
-# ------------------------------------------------------------------
-# 6. MAIN
-# ------------------------------------------------------------------
+    print(f"  Label height: {LABEL_RATIO:.0%} of glyph height")
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
