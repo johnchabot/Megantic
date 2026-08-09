@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """
-canada-generator.py (FINAL - Glyph 48, Label 24)
+canada-generator.py (Dark Mode)
 
 Generates a Canada sprite sheet from a .ttf or .otf font file.
 Features:
-- Auto-scaling to fit 48×48? (well, 48px tall, width stays 18)
+- Auto-scaling to fit 48×48 cells
 - Labels (Unicode character) in a 24px box under each glyph
 - Row grouping with metadata
 - Canvas width rounded to nearest multiple of 12
+- Dark background (#2a2e2f) with off-white glyphs and labels (#f0f0f0)
 
 Usage:
     python3 canada-generator.py <font.otf|ttf>
@@ -27,7 +28,7 @@ except ImportError:
     sys.exit(1)
 
 # ------------------------------------------------------------------
-# 1. CHARACTER SET & ROWS (same as before)
+# 1. CHARACTER SET & ROWS (unchanged)
 # ------------------------------------------------------------------
 
 CHARACTER_SET = {
@@ -93,7 +94,7 @@ ROWS = [
 ]
 
 # ------------------------------------------------------------------
-# 2. HELPER FUNCTIONS
+# 2. HELPER FUNCTIONS (unchanged)
 # ------------------------------------------------------------------
 
 def get_group_for_char(char):
@@ -125,7 +126,7 @@ def escape_xml_attr(value):
             .replace("'", "&apos;"))
 
 # ------------------------------------------------------------------
-# 3. GLYPH EXTRACTION WITH AUTO-SCALING
+# 3. GLYPH EXTRACTION WITH AUTO-SCALING (unchanged)
 # ------------------------------------------------------------------
 
 def extract_glyph_with_bounds(font, unicode_map, char, cell_w, cell_h):
@@ -202,12 +203,12 @@ def generate_sprite_sheet(font_path):
     print(f"✓ Font UPEM: {upem}")
 
     # ------------------------------------------------------------------
-    # CELL DIMENSIONS – NEW VALUES
+    # CELL DIMENSIONS
     # ------------------------------------------------------------------
 
-    BASE_CELL_W = 18          # 1× scale (width stays 18)
-    BASE_CELL_H = 48          # 1× scale (glyph box height)
-    LABEL_BOX_H = 24          # fixed 24px label height (1× scale)
+    BASE_CELL_W = 18
+    BASE_CELL_H = 48
+    LABEL_BOX_H = 24
     PAD_RIGHT = 12
     PAD_BOTTOM = 8
     ROW_PAD_LEFT = 20
@@ -216,7 +217,7 @@ def generate_sprite_sheet(font_path):
     def cell_dimensions(scale):
         glyph_w = int(BASE_CELL_W * scale)
         glyph_h = int(BASE_CELL_H * scale)
-        label_h = int(LABEL_BOX_H * scale)   # scales with the row
+        label_h = int(LABEL_BOX_H * scale)
         total_h = glyph_h + label_h
         return glyph_w, glyph_h, label_h, total_h
 
@@ -294,19 +295,25 @@ def generate_sprite_sheet(font_path):
     print(f"Rows: {len(built_rows)}")
 
     # ------------------------------------------------------------------
-    # BUILD SVG
+    # BUILD SVG – UPDATED COLORS
     # ------------------------------------------------------------------
 
     output = []
     output.append(f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {max_width} {total_height}" width="{max_width}" height="{total_height}">')
+
+    # --- CSS with dark mode colors ---
     output.append('  <style>')
-    output.append('    :root { --bg-color: #ffffff; --glyph-color: #000000; --label-color: #000000; }')
+    output.append('    :root {')
+    output.append('      --bg-color: #2a2e2f;   /* dark grey background */')
+    output.append('      --glyph-color: #f0f0f0; /* off-white glyphs */')
+    output.append('      --label-color: #f0f0f0; /* off-white labels */')
+    output.append('    }')
     output.append('    svg { background: var(--bg-color); }')
     output.append('    .glyph-on { fill: var(--glyph-color); }')
     output.append('    .glyph-label { fill: var(--label-color); font-family: "Arial Narrow", "Helvetica Condensed", sans-serif; font-weight: bold; text-anchor: middle; }')
     output.append('  </style>')
 
-    # Defs
+    # --- DEFS (glyphs) ---
     output.append('  <defs>')
     for char, data in glyphs_data.items():
         code = data["code"]
@@ -330,7 +337,7 @@ def generate_sprite_sheet(font_path):
         output.append('    </g>')
     output.append('  </defs>')
 
-    # Layout with labels
+    # --- LAYOUT: rows with labels ---
     output.append('  <!-- Sprite Sheet Layout: Row-based grouping with labels -->')
     current_y = ROW_PAD_TOP
     for group_name, chars, scale in built_rows:
@@ -344,14 +351,12 @@ def generate_sprite_sheet(font_path):
             if char in glyphs_data:
                 code = glyphs_data[char]["code"]
                 escaped_char = escape_xml_attr(char)
-                # Glyph
                 output.append(f'    <use href="#canada-{code}" x="{current_x}" />')
-                # Label (centered in the 24px box)
                 label_y = cell_h + label_h * 0.6
                 font_size = int(label_h * 0.7)
                 output.append(f'    <text class="glyph-label" x="{current_x + cell_w/2}" y="{label_y}" font-size="{font_size}">{escaped_char}</text>')
             else:
-                output.append(f'    <rect x="{current_x}" y="0" width="{cell_w}" height="{cell_h}" fill="none" stroke="#cccccc" stroke-width="0.5" />')
+                output.append(f'    <rect x="{current_x}" y="0" width="{cell_w}" height="{cell_h}" fill="none" stroke="#444444" stroke-width="0.5" />')
                 output.append(f'    <text class="glyph-label" x="{current_x + cell_w/2}" y="{cell_h + label_h*0.6}" font-size="{int(label_h*0.7)}">?</text>')
             current_x += cell_w + PAD_RIGHT
 
@@ -369,6 +374,7 @@ def generate_sprite_sheet(font_path):
     print(f"  Canvas: {max_width}×{total_height}")
     print(f"  Cell size: {BASE_CELL_W}×{BASE_CELL_H} (1×)")
     print(f"  Label box: {LABEL_BOX_H}px (1×)")
+    print(f"  Theme: Dark grey background with off-white text")
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
