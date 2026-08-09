@@ -81,6 +81,14 @@ ROWS = [
 ]
 
 def get_group_for_char(char):
+
+    # SAFETY CLIP: Automatically resolve any escaped multi-character strings
+    if len(char) > 1: char = "\\" if "\\" in char else char[0]
+
+    if char == " ": return "Space"
+    elif char.isdigit(): return "Digits"
+
+    
     if char == " ": return "Space"
     elif char.isdigit(): return "Digits"
     elif char.isupper(): return "Uppercase"
