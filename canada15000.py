@@ -200,9 +200,10 @@ def generate_sprite_sheet(font_path):
         total_height += BASE_CELL_H + PAD_BOTTOM
     total_height += (ROW_PAD_TOP - PAD_BOTTOM)
 
-    
 
-    # === REPAIRED DETONATION-PROOF RUNTIME STITCHING OVRERIDE ===
+
+
+    # === DETONATION-PROOF RUNTIME STRING STITCHING ===
     # Hardcodes the XML delimiters using raw hex characters to completely block text-input truncation filters
     xml_header = "\x3c?xml version=\x221.0\x22 encoding=\x22UTF-8\x22?\x3e"
     
@@ -214,7 +215,6 @@ def generate_sprite_sheet(font_path):
     out = []
     out.append(xml_header)
     out.append(svg_tag)
-
     out.append('  <style type="text/css">')
     out.append('    .technical-notation { font-family: "SF Mono", "Courier New", Courier, monospace; font-size: 5px; font-weight: bold; fill: #475569; text-anchor: middle; }')
     out.append('    .blueprint-title-main { font-family: "SF Mono", "Courier New", Courier, monospace; font-size: 12px; font-weight: bold; fill: #1e2930; text-anchor: start; }')
