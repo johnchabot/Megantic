@@ -379,10 +379,6 @@ def generate_sprite_sheet(font_path):
         current_y += BASE_CELL_H + PAD_BOTTOM
         
     out.append('  </g>')
-
-        current_y += BASE_CELL_H + PAD_BOTTOM
-        
-    out.append('  </g>')
     out.append('</svg>')
 
     # Stream out final document file array block
