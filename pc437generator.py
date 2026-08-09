@@ -3,30 +3,24 @@
 generate_cp437_sprite.py
 
 Generates cp437_sprite.svg – a 32×8 grid of all 256 CP437 glyphs.
-Each glyph is a 9×16 cell (8×16 bitmap + duplicated 9th column).
-Metadata (category, name, descriptor) is stored as data-* attributes
-on each <g> element. The SVG includes a full category legend.
+Each glyph is drawn using a single <path> with run-length encoding
+(M x,y h width) for maximum efficiency while remaining human-editable.
 
-The script automatically downloads the authentic IBM VGA 8x16 ROM font
-from a trusted CDN if a local copy is not found.
+The SVG is fully self-contained with all metadata as data-* attributes.
 
 Run: python3 generate_cp437_sprite.py
 Output: cp437_sprite.svg
 """
 
 import os
-import math
 import urllib.request
 
 # ======================================================================
-# 1. FONT DATA LOADER (Fetches authentic IBM VGA 8x16 ROM)
-#    Source: https://github.com/susam/pcface (public domain / MIT)
+# 1. FONT DATA LOADER (Authentic IBM VGA 8x16 ROM)
 # ======================================================================
 
 def get_font_bytes():
     """Returns the 4096-byte VGA 8x16 font bitmap."""
-    
-    # Option A: Check for a local file (so you can run offline later)
     local_file = "vga8x16.bin"
     if os.path.exists(local_file):
         with open(local_file, "rb") as f:
@@ -37,7 +31,6 @@ def get_font_bytes():
             else:
                 print(f"Warning: '{local_file}' is not 4096 bytes. Downloading...")
 
-    # Option B: Download from the pcface CDN (authentic IBM VGA font)
     url = "https://cdn.jsdelivr.net/npm/pcface/out/oldschool-pc-8x16.font"
     print(f"Downloading font from {url} ...")
     try:
@@ -45,7 +38,6 @@ def get_font_bytes():
             data = response.read()
             if len(data) != 4096:
                 raise RuntimeError(f"Downloaded file size is {len(data)} bytes, expected 4096.")
-            # Save a local copy for next time
             with open(local_file, "wb") as f:
                 f.write(data)
             print(f"✓ Font downloaded and saved to '{local_file}'")
@@ -55,56 +47,76 @@ def get_font_bytes():
 
 
 # ======================================================================
-# 2. CHARACTER METADATA (Categories, Names, & Retro Descriptors)
+# 2. METADATA DICTIONARY (Parent Groups, Subranges, Names, Descriptors)
 # ======================================================================
 
-# Mapping of index to (Category, Name, Descriptor)
-# Categories: Control, ASCII, Accented, Block, Line, Greek, Math, Symbol
-METADATA = {}
+# We define subrange descriptors as a mapping from (parent_group, subrange) -> description
+# Then each character maps to (parent_group, subrange, name, descriptor)
 
-# Controls (0-31, 127, 255)
-controls = [
-    (0, "NUL", "Does nothing. Absolute void."),
-    (1, "SMILEY", "The original emoji. Pure happiness."),
-    (2, "INV-SMILEY", "Upside-down smiley. Feels like a bug."),
-    (3, "HEART", "Love in the age of DOS."),
-    (4, "DIAMOND", "A gem for your text adventures."),
-    (5, "CLUB", "For the gambling BBS games."),
-    (6, "SPADE", "The ace of spades."),
-    (7, "BEL", "Makes the PC speaker BEEP! Drove sysadmins nuts."),
-    (8, "BACKSPACE", "Moves cursor left. Not delete!"),
-    (9, "TAB", "Jumps to the next tab stop."),
-    (10, "LF", "Moves cursor down one line."),
-    (11, "MALE", "The Mars symbol."),
-    (12, "FEMALE", "The Venus symbol."),
-    (13, "CR", "Slams the cursor back to the left margin. Like a typewriter!"),
-    (14, "MUSIC-NOTE", "Crank up the PC speaker for 1-bit tunes!"),
-    (15, "MUSIC-NOTE2", "Double the beep, double the fun."),
-    (16, "RIGHT-ARROW", "Pointer for your menus."),
-    (17, "LEFT-ARROW", "Go back."),
-    (18, "UP-DOWN-ARROW", "Vertical scrolling indicator."),
-    (19, "DOUBLE-EXCLAM", "❗ The alarm clock of the ASCII world."),
-    (20, "PILCROW", "The paragraph sign. For legal text."),
-    (21, "SECTION", "For chapter headings."),
-    (22, "HORIZ-BAR", "A solid horizontal bar."),
-    (23, "UP-DOWN", "Up/down arrow combo."),
-    (24, "UP-ARROW", "Go up."),
-    (25, "DOWN-ARROW", "Go down."),
-    (26, "RIGHT-ARROW2", "Another right arrow."),
-    (27, "ESC", "The 'OH NO, ABORT!' key."),
-    (28, "FILE-SEP", "File separator."),
-    (29, "GROUP-SEP", "Group separator."),
-    (30, "REC-SEP", "Record separator."),
-    (31, "UNIT-SEP", "Unit separator."),
-    (127, "DEL", "Deletes the character under the cursor. Not Backspace!"),
-    (255, "NBSP", "Invisible. Used for sneaky filenames that look blank.")
-]
-for idx, name, desc in controls:
-    METADATA[idx] = ("Control", name, desc)
+SUB_RANGES = {
+    ("Control and Standard ASCII", "0"): "Null",
+    ("Control and Standard ASCII", "01–06"): "Face icons and card suits",
+    ("Control and Standard ASCII", "07–10"): "Bell, backspace, tab, line feed",
+    ("Control and Standard ASCII", "11–12"): "Male, female symbols",
+    ("Control and Standard ASCII", "13–31"): "Musical notes, arrows, and separators",
+    ("Printable ASCII", "32–64"): "Space, punctuation, 0-9, special symbols",
+    ("Printable ASCII", "65–90"): "Uppercase English letters from A to Z",
+    ("Printable ASCII", "91–126"): "Brackets, symbols, and lowercase letters a-z",
+    ("Extended and International Characters", "127–165"): "House icon, accented European vowels/consonants, and currency/math",
+    ("Extended and International Characters", "166–223"): "Box-drawing lines, corners, intersections, and shaded fill blocks",
+    ("Extended and International Characters", "224–254"): "Greek characters and math symbols",
+    ("Extended and International Characters", "255"): "Non-breaking space",
+}
 
-# ASCII (32-126)
-ascii_names = [
-    ("Space", "The invisible character you type most."),
+# Character mapping: index -> (parent_group, subrange, name, descriptor)
+CHAR_META = {}
+
+# 0
+CHAR_META[0] = ("Control and Standard ASCII", "0", "NUL", "Null Character")
+
+# 1–6 (Face icons and card suits)
+CHAR_META[1] = ("Control and Standard ASCII", "01–06", "WHITE SMILEY FACE", "Used as a player character in early rogue-like games.")
+CHAR_META[2] = ("Control and Standard ASCII", "01–06", "BLACK SMILEY FACE", "Often used for enemy sprites or NPCs.")
+CHAR_META[3] = ("Control and Standard ASCII", "01–06", "HEART", "Represented player health, lives, or romance text games.")
+CHAR_META[4] = ("Control and Standard ASCII", "01–06", "DIAMOND", "Standard card suit for text-based casino games.")
+CHAR_META[5] = ("Control and Standard ASCII", "01–06", "CLUB", "Card suit icon.")
+CHAR_META[6] = ("Control and Standard ASCII", "01–06", "SPADE", "Card suit icon.")
+
+# 7–10 (Bell, backspace, tab, line feed)
+CHAR_META[7] = ("Control and Standard ASCII", "07–10", "BULLET", "Used for UI option lists or projectile weapon sprites.")
+CHAR_META[8] = ("Control and Standard ASCII", "07–10", "INVERSE BULLET", "Used for toggled UI selections.")
+CHAR_META[9] = ("Control and Standard ASCII", "07–10", "EMPTY CIRCLE", "Used for unchecked radio buttons.")
+CHAR_META[10] = ("Control and Standard ASCII", "07–10", "INVERSE CIRCLE", "Used for checked radio buttons or target cursors.")
+
+# 11–12 (Male, female symbols)
+CHAR_META[11] = ("Control and Standard ASCII", "11–12", "MALE SYMBOL", "Used in early RPG character creation screens.")
+CHAR_META[12] = ("Control and Standard ASCII", "11–12", "FEMALE SYMBOL", "Used in early RPG character creation screens.")
+
+# 13–31 (Musical notes, arrows, and separators)
+CHAR_META[13] = ("Control and Standard ASCII", "13–31", "EIGHTH NOTE", "Indicated background music files or text prompts.")
+CHAR_META[14] = ("Control and Standard ASCII", "13–31", "BEAMED EIGHTH NOTES", "Audio setting indicators.")
+CHAR_META[15] = ("Control and Standard ASCII", "13–31", "SUN/GEAR", "Represented brightness settings or daytime states.")
+CHAR_META[16] = ("Control and Standard ASCII", "13–31", "FORWARD POINTER", "Used as menu selectors or media play buttons.")
+CHAR_META[17] = ("Control and Standard ASCII", "13–31", "BACKWARD POINTER", "Menu navigators or media rewind buttons.")
+CHAR_META[18] = ("Control and Standard ASCII", "13–31", "UP/DOWN ARROW", "Indicated that a text window could be scrolled vertically.")
+CHAR_META[19] = ("Control and Standard ASCII", "13–31", "DOUBLE EXCLAMATION", "Critical alerts or text-adventure action prompts.")
+CHAR_META[20] = ("Control and Standard ASCII", "13–31", "PARAGRAPH/PILCROW", "Word-processing layout markers.")
+CHAR_META[21] = ("Control and Standard ASCII", "13–31", "SECTION SIGN", "Form mapping for legal or structured text blocks.")
+CHAR_META[22] = ("Control and Standard ASCII", "13–31", "LOWER HALF BLOCK", "Block-art rendering to build faux-graphic landscapes.")
+CHAR_META[23] = ("Control and Standard ASCII", "13–31", "UP ARROW WITH BASE", "Window scrolling indicator.")
+CHAR_META[24] = ("Control and Standard ASCII", "13–31", "UP ARROW", "In-game directions and UI navigation.")
+CHAR_META[25] = ("Control and Standard ASCII", "13–31", "DOWN ARROW", "In-game directions and UI navigation.")
+CHAR_META[26] = ("Control and Standard ASCII", "13–31", "RIGHT ARROW", "Directional navigation pointer.")
+CHAR_META[27] = ("Control and Standard ASCII", "13–31", "LEFT ARROW", "Directional navigation pointer.")
+CHAR_META[28] = ("Control and Standard ASCII", "13–31", "RIGHT ANGLE/FILE SEP", "Form formatting and geometric data math.")
+CHAR_META[29] = ("Control and Standard ASCII", "13–31", "LEFT/RIGHT ARROW", "Horizontal scrolling layout indicator.")
+CHAR_META[30] = ("Control and Standard ASCII", "13–31", "UP TRIANGLE", "Menu scroll up indicators.")
+CHAR_META[31] = ("Control and Standard ASCII", "13–31", "DOWN TRIANGLE", "Menu scroll down indicators.")
+
+# 32–64 (Space, punctuation, 0-9, special symbols)
+# We'll fill this programmatically
+ascii_names_32_64 = [
+    ("SPACE", "The invisible character you type most."),
     ("!", "Exclamation mark. Shout it!"),
     ("\"", "Double quote. For dialog."),
     ("#", "Hash. Number sign."),
@@ -137,6 +149,12 @@ ascii_names = [
     (">", "Greater than."),
     ("?", "Question mark. Huh?"),
     ("@", "At sign. Addresses."),
+]
+for idx, (name, desc) in enumerate(ascii_names_32_64, start=32):
+    CHAR_META[idx] = ("Printable ASCII", "32–64", name, desc)
+
+# 65–90 (Uppercase English letters from A to Z)
+ascii_names_65_90 = [
     ("A", "The first letter. The one that starts 'AARDVARK'."),
     ("B", "B. For 'BEE'."),
     ("C", "C. For 'CAT'."),
@@ -163,12 +181,18 @@ ascii_names = [
     ("X", "X. For 'XRAY'."),
     ("Y", "Y. For 'YANKEE'."),
     ("Z", "Z. For 'ZULU'."),
-    ("[", "Left bracket."),
-    ("\\", "Backslash. Escape."),
-    ("]", "Right bracket."),
-    ("^", "Caret. XOR."),
-    ("_", "Underscore. For snake_case."),
-    ("`", "Backtick. Grave."),
+]
+for idx, (name, desc) in enumerate(ascii_names_65_90, start=65):
+    CHAR_META[idx] = ("Printable ASCII", "65–90", name, desc)
+
+# 91–126 (Brackets, symbols, and lowercase letters a-z)
+ascii_names_91_126 = [
+    ("LEFT BRACKET", "The opening square bracket."),
+    ("BACKSLASH", "Backslash. Escape."),
+    ("RIGHT BRACKET", "The closing square bracket."),
+    ("CARET", "Caret. XOR."),
+    ("UNDERSCORE", "Underscore. For snake_case."),
+    ("BACKTICK", "Backtick. Grave."),
     ("a", "Lowercase A. For 'apple'."),
     ("b", "Lowercase B."),
     ("c", "Lowercase C."),
@@ -195,269 +219,302 @@ ascii_names = [
     ("x", "Lowercase X."),
     ("y", "Lowercase Y."),
     ("z", "Lowercase Z."),
-    ("{", "Left brace."),
-    ("|", "Pipe. Vertical bar."),
-    ("}", "Right brace."),
-    ("~", "Tilde. Home directory.")
+    ("LEFT BRACE", "Left brace."),
+    ("PIPE", "Pipe. Vertical bar."),
+    ("RIGHT BRACE", "Right brace."),
+    ("TILDE", "Tilde. Home directory."),
 ]
-for idx, (name, desc) in enumerate(ascii_names, start=32):
-    METADATA[idx] = ("ASCII", name, desc)
+for idx, (name, desc) in enumerate(ascii_names_91_126, start=91):
+    CHAR_META[idx] = ("Printable ASCII", "91–126", name, desc)
 
-# Accented (128-175)
-accented = [
-    ("Ç", "C-cedilla. For 'façade'."),
-    ("ü", "U-umlaut. For 'über'."),
-    ("é", "E-acute. For 'café'."),
-    ("â", "A-circumflex. For 'château'."),
-    ("ä", "A-umlaut. For 'Märchen'."),
-    ("à", "A-grave. For 'voilà'."),
-    ("å", "A-ring. For 'Ångström'."),
-    ("ç", "C-cedilla (lower)."),
-    ("ê", "E-circumflex."),
-    ("ë", "E-umlaut."),
-    ("è", "E-grave."),
-    ("ï", "I-umlaut."),
-    ("î", "I-circumflex."),
-    ("ì", "I-grave."),
-    ("Ä", "A-umlaut (upper)."),
-    ("Å", "A-ring (upper)."),
-    ("É", "E-acute (upper)."),
-    ("æ", "AE-ligature (lower)."),
-    ("Æ", "AE-ligature (upper)."),
-    ("ô", "O-circumflex."),
-    ("ö", "O-umlaut."),
-    ("ò", "O-grave."),
-    ("û", "U-circumflex."),
-    ("ù", "U-grave."),
-    ("ÿ", "Y-umlaut."),
-    ("Ö", "O-umlaut (upper)."),
-    ("Ü", "U-umlaut (upper)."),
-    ("¢", "Cent sign."),
-    ("£", "Pound sterling."),
-    ("¥", "Yen sign."),
-    ("₧", "Peseta sign."),
-    ("ƒ", "Florin."),
-    ("á", "A-acute."),
-    ("í", "I-acute."),
-    ("ó", "O-acute."),
-    ("ú", "U-acute."),
-    ("ñ", "N-tilde."),
-    ("Ñ", "N-tilde (upper)."),
-    ("ª", "Feminine ordinal."),
-    ("º", "Masculine ordinal."),
-    ("¿", "Inverted question."),
-    ("⌐", "Not sign."),
-    ("¬", "Logical not."),
-    ("½", "One-half."),
-    ("¼", "One-quarter."),
-    ("¡", "Inverted exclamation."),
-    ("«", "Left guillemet."),
-    ("»", "Right guillemet."),
+# 127 (House)
+CHAR_META[127] = ("Extended and International Characters", "127–165", "HOUSE", "The classic IBM PC 'home' icon.")
+
+# 128–165 (Accented vowels/consonants, currency/math)
+accented_names = [
+    ("C-CEDILLA", "C-cedilla. For 'façade'."),
+    ("U-UMLAUT", "U-umlaut. For 'über'."),
+    ("E-ACUTE", "E-acute. For 'café'."),
+    ("A-CIRCUMFLEX", "A-circumflex. For 'château'."),
+    ("A-UMLAUT", "A-umlaut. For 'Märchen'."),
+    ("A-GRAVE", "A-grave. For 'voilà'."),
+    ("A-RING", "A-ring. For 'Ångström'."),
+    ("C-CEDILLA-LOWER", "C-cedilla (lower)."),
+    ("E-CIRCUMFLEX", "E-circumflex."),
+    ("E-UMLAUT", "E-umlaut."),
+    ("E-GRAVE", "E-grave."),
+    ("I-UMLAUT", "I-umlaut."),
+    ("I-CIRCUMFLEX", "I-circumflex."),
+    ("I-GRAVE", "I-grave."),
+    ("A-UMLAUT-UPPER", "A-umlaut (upper)."),
+    ("A-RING-UPPER", "A-ring (upper)."),
+    ("E-ACUTE-UPPER", "E-acute (upper)."),
+    ("AE-LIGATURE-LOWER", "AE-ligature (lower)."),
+    ("AE-LIGATURE-UPPER", "AE-ligature (upper)."),
+    ("O-CIRCUMFLEX", "O-circumflex."),
+    ("O-UMLAUT", "O-umlaut."),
+    ("O-GRAVE", "O-grave."),
+    ("U-CIRCUMFLEX", "U-circumflex."),
+    ("U-GRAVE", "U-grave."),
+    ("Y-UMLAUT", "Y-umlaut."),
+    ("O-UMLAUT-UPPER", "O-umlaut (upper)."),
+    ("U-UMLAUT-UPPER", "U-umlaut (upper)."),
+    ("CENT", "Cent sign."),
+    ("POUND", "Pound sterling."),
+    ("YEN", "Yen sign."),
+    ("PESETA", "Peseta sign."),
+    ("FLORIN", "Florin."),
+    ("A-ACUTE", "A-acute."),
+    ("I-ACUTE", "I-acute."),
+    ("O-ACUTE", "O-acute."),
+    ("U-ACUTE", "U-acute."),
+    ("N-TILDE", "N-tilde."),
+    ("N-TILDE-UPPER", "N-tilde (upper)."),
+    ("FEMININE-ORDINAL", "Feminine ordinal."),
+    ("MASCULINE-ORDINAL", "Masculine ordinal."),
+    ("INVERTED-QUESTION", "Inverted question."),
+    ("NOT-SIGN", "Not sign."),
+    ("LOGICAL-NOT", "Logical not."),
+    ("ONE-HALF", "One-half."),
+    ("ONE-QUARTER", "One-quarter."),
+    ("INVERTED-EXCLAMATION", "Inverted exclamation."),
+    ("LEFT-GUILLEMET", "Left guillemet."),
+    ("RIGHT-GUILLEMET", "Right guillemet."),
 ]
-for idx, (name, desc) in enumerate(accented, start=128):
-    METADATA[idx] = ("Accented", name, desc)
+for idx, (name, desc) in enumerate(accented_names, start=128):
+    CHAR_META[idx] = ("Extended and International Characters", "127–165", name, desc)
 
-# Block (176-178)
-blocks = [
-    ("░", "Light shade. For subtle shadows."),
-    ("▒", "Medium shade. The gray area."),
-    ("▓", "Dark shade. Almost solid."),
+# 166–223 (Box-drawing lines, corners, intersections, shaded fill blocks)
+line_names = [
+    ("VERTICAL-LINE", "Vertical line."),
+    ("RIGHT-T", "Right T."),
+    ("RIGHT-T-DOUBLE", "Right T (double)."),
+    ("RIGHT-T-DOUBLE-2", "Right T (double)."),
+    ("CORNER-DOUBLE", "Corner (double)."),
+    ("CORNER-DOUBLE-2", "Corner (double)."),
+    ("CROSS-DOUBLE", "Cross (double)."),
+    ("DOUBLE-VERTICAL", "Double vertical."),
+    ("TOP-RIGHT-CORNER", "Top right corner."),
+    ("BOTTOM-RIGHT-CORNER", "Bottom right corner."),
+    ("CORNER-DOUBLE-3", "Corner (double)."),
+    ("CORNER-DOUBLE-4", "Corner (double)."),
+    ("TOP-RIGHT-CORNER-2", "Top right corner."),
+    ("BOTTOM-LEFT-CORNER", "Bottom left corner."),
+    ("BOTTOM-T", "Bottom T."),
+    ("TOP-T", "Top T."),
+    ("LEFT-T", "Left T."),
+    ("HORIZONTAL-LINE", "Horizontal line."),
+    ("CROSS", "Cross."),
+    ("LEFT-T-DOUBLE", "Left T (double)."),
+    ("LEFT-T-DOUBLE-2", "Left T (double)."),
+    ("BOTTOM-LEFT-DOUBLE", "Bottom left (double)."),
+    ("TOP-LEFT-DOUBLE", "Top left (double)."),
+    ("BOTTOM-T-DOUBLE", "Bottom T (double)."),
+    ("TOP-T-DOUBLE", "Top T (double)."),
+    ("LEFT-T-DOUBLE-3", "Left T (double)."),
+    ("DOUBLE-HORIZONTAL", "Double horizontal."),
+    ("DOUBLE-CROSS", "Double cross."),
+    ("BOTTOM-T-DOUBLE-2", "Bottom T (double)."),
+    ("BOTTOM-T-DOUBLE-3", "Bottom T (double)."),
+    ("TOP-T-DOUBLE-2", "Top T (double)."),
+    ("TOP-T-DOUBLE-3", "Top T (double)."),
+    ("CORNER-DOUBLE-5", "Corner (double)."),
+    ("CORNER-DOUBLE-6", "Corner (double)."),
+    ("CORNER-DOUBLE-7", "Corner (double)."),
+    ("CORNER-DOUBLE-8", "Corner (double)."),
+    ("CROSS-DOUBLE-2", "Cross (double)."),
+    ("CROSS-DOUBLE-3", "Cross (double)."),
+    ("BOTTOM-RIGHT-CORNER-2", "Bottom right corner."),
+    ("TOP-LEFT-CORNER", "Top left corner."),
+    ("FULL-BLOCK", "Full block. Solid!"),
+    ("LOWER-HALF-BLOCK", "Lower half block."),
+    ("LEFT-HALF-BLOCK", "Left half block."),
+    ("RIGHT-HALF-BLOCK", "Right half block."),
+    ("UPPER-HALF-BLOCK", "Upper half block."),
 ]
-for idx, (name, desc) in enumerate(blocks, start=176):
-    METADATA[idx] = ("Block", name, desc)
+for idx, (name, desc) in enumerate(line_names, start=166):
+    CHAR_META[idx] = ("Extended and International Characters", "166–223", name, desc)
 
-# Line (179-223)
-lines = [
-    ("│", "Vertical line."),
-    ("┤", "Right T."),
-    ("╡", "Right T (double)."),
-    ("╢", "Right T (double)."),
-    ("╖", "Corner (double)."),
-    ("╕", "Corner (double)."),
-    ("╣", "Cross (double)."),
-    ("║", "Double vertical."),
-    ("╗", "Top right corner."),
-    ("╝", "Bottom right corner."),
-    ("╜", "Corner (double)."),
-    ("╛", "Corner (double)."),
-    ("┐", "Top right corner."),
-    ("└", "Bottom left corner."),
-    ("┴", "Bottom T."),
-    ("┬", "Top T."),
-    ("├", "Left T."),
-    ("─", "Horizontal line."),
-    ("┼", "Cross."),
-    ("╞", "Left T (double)."),
-    ("╟", "Left T (double)."),
-    ("╚", "Bottom left (double)."),
-    ("╔", "Top left (double)."),
-    ("╩", "Bottom T (double)."),
-    ("╦", "Top T (double)."),
-    ("╠", "Left T (double)."),
-    ("═", "Double horizontal."),
-    ("╬", "Double cross."),
-    ("╧", "Bottom T (double)."),
-    ("╨", "Bottom T (double)."),
-    ("╤", "Top T (double)."),
-    ("╥", "Top T (double)."),
-    ("╙", "Corner (double)."),
-    ("╘", "Corner (double)."),
-    ("╒", "Corner (double)."),
-    ("╓", "Corner (double)."),
-    ("╫", "Cross (double)."),
-    ("╪", "Cross (double)."),
-    ("┘", "Bottom right corner."),
-    ("┌", "Top left corner."),
-    ("█", "Full block. Solid!"),
-    ("▄", "Lower half block."),
-    ("▌", "Left half block."),
-    ("▐", "Right half block."),
-    ("▀", "Upper half block."),
+# 224–254 (Greek characters and math symbols)
+greek_math_names = [
+    ("ALPHA", "Alpha. The beginning."),
+    ("ESZETT", "Eszett. Double S."),
+    ("GAMMA", "Gamma. Third letter."),
+    ("PI", "Pi. For circles and calculus."),
+    ("SIGMA-UPPER", "Sigma. Summation."),
+    ("SIGMA-LOWER", "Sigma (lower). Standard deviation."),
+    ("MU", "Mu. Micro."),
+    ("TAU", "Tau. Time constant."),
+    ("PHI-UPPER", "Phi. The golden ratio."),
+    ("THETA", "Theta. Angle."),
+    ("OMEGA", "Omega. The end."),
+    ("DELTA-LOWER", "Delta. Change."),
+    ("INFINITY", "Infinity. The endless loop."),
+    ("PHI-LOWER", "Phi (lower)."),
+    ("EPSILON", "Epsilon."),
+    ("INTERSECTION", "Intersection. The overlap."),
+    ("IDENTICAL-TO", "Identical to. Triple bar."),
+    ("PLUS-MINUS", "Plus/minus. Margin of error."),
+    ("GREATER-EQUAL", "Greater than or equal."),
+    ("LESS-EQUAL", "Less than or equal."),
+    ("TOP-INTEGRAL", "Top integral."),
+    ("BOTTOM-INTEGRAL", "Bottom integral."),
+    ("DIVISION", "Division sign. Split the loot."),
+    ("APPROXIMATELY", "Approximately. Close enough."),
+    ("DEGREE", "Degree. Temperature."),
+    ("BULLET-OPERATOR", "Bullet operator."),
+    ("MIDDLE-DOT", "Middle dot."),
+    ("SQUARE-ROOT", "Square root."),
+    ("SUPERSCRIPT-N", "Superscript n."),
+    ("SQUARED", "Squared."),
+    ("BLACK-SQUARE", "Black square. Game over."),
 ]
-# The list length from 179 to 223 is 45. The provided list has 45 items? Let's check.
-# 179 to 223 inclusive is 45. I provided exactly 45 names above (count them). Good.
-for idx, (name, desc) in enumerate(lines, start=179):
-    METADATA[idx] = ("Line", name, desc)
+for idx, (name, desc) in enumerate(greek_math_names, start=224):
+    CHAR_META[idx] = ("Extended and International Characters", "224–254", name, desc)
 
-# Greek (224-237)
-greek = [
-    ("α", "Alpha. The beginning."),
-    ("ß", "Eszett. Double S."),
-    ("Γ", "Gamma. Third letter."),
-    ("π", "Pi. For circles and calculus."),
-    ("Σ", "Sigma. Summation."),
-    ("σ", "Sigma (lower). Standard deviation."),
-    ("µ", "Mu. Micro."),
-    ("τ", "Tau. Time constant."),
-    ("Φ", "Phi. The golden ratio."),
-    ("Θ", "Theta. Angle."),
-    ("Ω", "Omega. The end."),
-    ("δ", "Delta. Change."),
-    ("∞", "Infinity. The endless loop."),
-    ("φ", "Phi (lower)."),
-    ("ε", "Epsilon."),
-    ("∩", "Intersection. The overlap."),
-]
-for idx, (name, desc) in enumerate(greek, start=224):
-    METADATA[idx] = ("Greek", name, desc)
+# 255 (NBSP)
+CHAR_META[255] = ("Extended and International Characters", "255", "NBSP", "Invisible. Used for sneaky filenames that look blank.")
 
-# Math (238-254)
-math = [
-    ("≡", "Identical to. Triple bar."),
-    ("±", "Plus/minus. Margin of error."),
-    ("≥", "Greater than or equal."),
-    ("≤", "Less than or equal."),
-    ("⌠", "Top integral."),
-    ("⌡", "Bottom integral."),
-    ("÷", "Division sign. Split the loot."),
-    ("≈", "Approximately. Close enough."),
-    ("°", "Degree. Temperature."),
-    ("∙", "Bullet operator."),
-    ("·", "Middle dot."),
-    ("√", "Square root."),
-    ("ⁿ", "Superscript n."),
-    ("²", "Squared."),
-    ("■", "Black square. Game over."),
-]
-for idx, (name, desc) in enumerate(math, start=238):
-    METADATA[idx] = ("Math", name, desc)
-
-# Fill missing (just in case)
-for i in range(256):
-    if i not in METADATA:
-        METADATA[i] = ("Unknown", f"Char-{i}", "Undefined.")
 
 # ======================================================================
-# 3. SVG GENERATOR
+# 3. PATH GENERATOR (Run-Length Encoding)
+# ======================================================================
+
+def generate_path_for_glyph(font_data, char_idx, scale=4):
+    """
+    Returns a string containing the SVG path 'd' attribute for the glyph.
+    Uses run-length encoding: M x,y h width for each run of lit pixels.
+    The 9th column is duplicated from the 8th (VGA behavior).
+    """
+    commands = []
+    for row in range(16):
+        byte = font_data[char_idx * 16 + row]
+        # Build 9-bit row: bits 0..7 (LSB = leftmost) + duplicate bit 7
+        bits = []
+        for col in range(8):
+            bits.append(1 if (byte & (1 << col)) else 0)
+        bits.append(bits[7])  # duplicate the 8th column
+
+        # Scan for runs of 1s
+        x = 0
+        while x < 9:
+            if bits[x] == 1:
+                start_x = x
+                while x < 9 and bits[x] == 1:
+                    x += 1
+                # Emit: M{start_x*scale},{row*scale} h{(x-start_x)*scale}
+                commands.append(f"M{start_x * scale},{row * scale}h{(x - start_x) * scale}")
+            else:
+                x += 1
+    if not commands:
+        # Empty glyph (shouldn't happen, but just in case)
+        return ""
+    return " ".join(commands)
+
+
+# ======================================================================
+# 4. SVG GENERATOR
 # ======================================================================
 
 def generate_svg(font_data):
     scale = 4
     cols = 32
     rows = 8
-    bitmap_w = 9  # 8 + 1 duplicated
+    bitmap_w = 9  # 8 + duplicated 9th
     bitmap_h = 16
 
-    # Overall SVG dimensions (zero gap between cells)
     svg_width = cols * bitmap_w * scale
     svg_height = rows * bitmap_h * scale
 
-    lines_out = []
-    lines_out.append(f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {svg_width} {svg_height}" width="{svg_width}" height="{svg_height}">')
-    lines_out.append('  <rect width="100%" height="100%" fill="#000000"/>')
-    lines_out.append('  <defs>')
+    lines = []
+    lines.append(f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {svg_width} {svg_height}" width="{svg_width}" height="{svg_height}">')
 
-    # Generate each glyph
+    # ---- Header comments ----
+    lines.append('  <!--')
+    lines.append('    IBM Code Page 437 character set (256-glyph)')
+    lines.append('    Presented in VGA 8×16 goodness')
+    lines.append('    BIOS interrupt details (INT 9h/16h)')
+    lines.append('    Renders standard 80×25 text modes and higher-resolution graphics layouts')
+    lines.append('')
+    lines.append('    Categories:')
+    lines.append('    ===========')
+    lines.append('    Control   | 0-31, 127, 255   | NUL, SOH, BEL, CR, ESC, DEL, etc.')
+    lines.append('    ASCII     | 32-126           | Space, punctuation, A-Z, a-z, 0-9, brackets, symbols')
+    lines.append('    Accented  | 128-175          | European accented vowels & consonants')
+    lines.append('    Block     | 176-178          | Shading blocks (light, medium, dark)')
+    lines.append('    Line      | 179-223          | Box-drawing lines, corners, intersections')
+    lines.append('    Greek     | 224-237          | Greek letters (alpha, beta, pi, etc.)')
+    lines.append('    Math      | 238-254          | Math symbols (degree, +/- , division, etc.)')
+    lines.append('    Symbol    | 1-6, 9-12, 14-26 | Musical notes, arrows, card suits, smileys, house')
+    lines.append('')
+    lines.append('    Control and Standard ASCII (0–31):')
+    lines.append('    0: Null')
+    lines.append('    01–06: Face icons and card suits')
+    lines.append('    07–10: Bell, backspace, tab, line feed')
+    lines.append('    11–12: Male, female symbols')
+    lines.append('    13–31: Musical notes, arrows, and separators')
+    lines.append('')
+    lines.append('    Printable ASCII (32–126):')
+    lines.append('    32–64: Space, punctuation, numbers 0–9, and [uppercase A-Z (cleanup: these are 65–90)]')
+    lines.append('    91–126: Brackets, symbols, and lowercase letters a–z')
+    lines.append('')
+    lines.append('    Extended and International Characters (127–255):')
+    lines.append('    127–165: House icon, accented European vowels/consonants, and currency/math')
+    lines.append('    166–223: Box-drawing lines, corners, intersections, and shaded fill blocks')
+    lines.append('    224–254: Greek characters and math symbols')
+    lines.append('    255: Non-breaking space')
+    lines.append('  -->')
+    lines.append('')
+
+    lines.append('  <rect width="100%" height="100%" fill="#000000"/>')
+    lines.append('  <defs>')
+
+    # ---- Generate glyph definitions ----
     for char_idx in range(256):
-        idx_hex = f"{char_idx:02X}"
-        category, name, desc = METADATA[char_idx]
+        parent_group, subrange, name, desc = CHAR_META[char_idx]
+        subrange_desc = SUB_RANGES.get((parent_group, subrange), "")
 
-        # Build comment
-        comment = f"pc437-{char_idx} ({category} | {name} - {desc})"
-        lines_out.append(f'    <!-- {comment} -->')
+        # Inline comment
+        lines.append(f'    <!-- pc437-{char_idx} ({parent_group} | {subrange} | {name}) -->')
 
-        # Start group with metadata
+        # Build path
+        path_data = generate_path_for_glyph(font_data, char_idx, scale)
+
+        # Attributes
         attrs = [
             f'id="pc437-{char_idx}"',
             f'data-index="{char_idx}"',
-            f'data-hex="{idx_hex}"',
-            f'data-category="{category}"',
+            f'data-parent-group="{parent_group}"',
+            f'data-subrange="{subrange}"',
+            f'data-subrange-descriptor="{subrange_desc}"',
             f'data-name="{name}"',
-            f'data-descriptor="{desc}"'
+            f'data-descriptor="{desc}"',
         ]
-        lines_out.append(f'    <g {" ".join(attrs)}>')
+        lines.append(f'    <g {" ".join(attrs)}>')
+        if path_data:
+            lines.append(f'      <path d="{path_data}" fill="#FFFFFF"/>')
+        # If empty path (shouldn't happen), we just leave the group empty
+        lines.append('    </g>')
 
-        # Draw the 16 rows
-        for row in range(bitmap_h):
-            byte = font_data[char_idx * 16 + row]
-            # Scan bits 0..7 (LSB = leftmost pixel)
-            # We create a 9-bit row: bits 0..7 + duplicate bit 7
-            # Build a string of '1' and '0' for pixels
-            row_bits = []
-            for col in range(8):  # 0 to 7
-                if byte & (1 << col):
-                    row_bits.append('1')
-                else:
-                    row_bits.append('0')
-            # Duplicate the 8th column (index 7) into column 8
-            row_bits.append(row_bits[7])
+    lines.append('  </defs>')
+    lines.append('')
 
-            # Compress runs of 1s into rectangles
-            x = 0
-            while x < 9:
-                if row_bits[x] == '1':
-                    start_x = x
-                    while x < 9 and row_bits[x] == '1':
-                        x += 1
-                    # rectangle from start_x to x-1
-                    rect_x = start_x * scale
-                    rect_y = row * scale
-                    rect_w = (x - start_x) * scale
-                    lines_out.append(f'      <rect x="{rect_x}" y="{rect_y}" width="{rect_w}" height="{scale}" fill="#FFFFFF"/>')
-                else:
-                    x += 1
-
-        lines_out.append('    </g>')
-
-    lines_out.append('  </defs>')
-
-    # Place the glyphs in a 32x8 grid
-    lines_out.append('  <!-- Sprite Sheet Layout: 32 columns x 8 rows -->')
+    # ---- Sprite Sheet Layout: 32 columns x 8 rows ----
+    lines.append('  <!-- Sprite Sheet Layout: 32 columns x 8 rows -->')
     for char_idx in range(256):
         row = char_idx // cols
         col = char_idx % cols
         x = col * bitmap_w * scale
         y = row * bitmap_h * scale
-        category, name, desc = METADATA[char_idx]
-        comment = f"pc437-{char_idx} ({category} | {name})"
-        lines_out.append(f'  <use href="#pc437-{char_idx}" x="{x}" y="{y}" /> <!-- {comment} -->')
+        parent_group, subrange, name, desc = CHAR_META[char_idx]
+        lines.append(f'  <use href="#pc437-{char_idx}" x="{x}" y="{y}" /> <!-- pc437-{char_idx} ({parent_group} | {subrange} | {name}) -->')
 
-    lines_out.append('</svg>')
-    return "\n".join(lines_out)
+    lines.append('</svg>')
+    return "\n".join(lines)
 
 
 # ======================================================================
-# 4. MAIN
+# 5. MAIN
 # ======================================================================
 
 if __name__ == "__main__":
@@ -470,5 +527,6 @@ if __name__ == "__main__":
             f.write(svg_content)
         print(f"✓ Successfully generated '{output_file}'")
         print(f"  Dimensions: 32x8 grid, {32 * 9 * 4} x {8 * 16 * 4} pixels")
+        print(f"  File size: {os.path.getsize(output_file):,} bytes")
     except Exception as e:
         print(f"Error: {e}")
