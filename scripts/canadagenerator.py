@@ -1,0 +1,509 @@
+#!/usr/bin/env python3
+"""
+canada-generator.py (with auto-scaling)
+
+Generates a Canada sprite sheet from a .ttf or .otf font file.
+Glyphs are automatically scaled to fit the 18×39 cells.
+
+Usage:
+    python3 canada-generator.py <font.otf|ttf>
+Output: canada_sprite.svg
+"""
+
+import sys
+import os
+import math
+
+try:
+    from fontTools.ttLib import TTFont
+    from fontTools.pens.svgPathPen import SVGPathPen
+    from fontTools.pens.transformPen import TransformPen
+    from fontTools.misc.transform import Identity
+    FONTTOOLS_AVAILABLE = True
+except ImportError:
+    FONTTOOLS_AVAILABLE = False
+    print("⚠️ fonttools not installed. Install with: pip install fonttools")
+    sys.exit(1)
+
+# ------------------------------------------------------------------
+# 1. CHARACTER SET (Unicode code points) – same as before
+# ------------------------------------------------------------------
+
+CHARACTER_SET = {
+    " ": 0x0020,
+    "!": 0x0021,
+    '"': 0x0022,
+    "#": 0x0023,
+    "$": 0x0024,
+    "%": 0x0025,
+    "&": 0x0026,
+    "'": 0x0027,
+    "(": 0x0028,
+    ")": 0x0029,
+    "*": 0x002A,
+    "+": 0x002B,
+    ",": 0x002C,
+    "-": 0x002D,
+    ".": 0x002E,
+    "/": 0x002F,
+    ":": 0x003A,
+    ";": 0x003B,
+    "<": 0x003C,
+    "=": 0x003D,
+    ">": 0x003E,
+    "?": 0x003F,
+    "@": 0x0040,
+    "[": 0x005B,
+    "\\": 0x005C,
+    "]": 0x005D,
+    "^": 0x005E,
+    "_": 0x005F,
+    "`": 0x0060,
+    "{": 0x007B,
+    "|": 0x007C,
+    "}": 0x007D,
+    "~": 0x007E,
+    "0": 0x0030,
+    "1": 0x0031,
+    "2": 0x0032,
+    "3": 0x0033,
+    "4": 0x0034,
+    "5": 0x0035,
+    "6": 0x0036,
+    "7": 0x0037,
+    "8": 0x0038,
+    "9": 0x0039,
+    "A": 0x0041,
+    "B": 0x0042,
+    "C": 0x0043,
+    "D": 0x0044,
+    "E": 0x0045,
+    "F": 0x0046,
+    "G": 0x0047,
+    "H": 0x0048,
+    "I": 0x0049,
+    "J": 0x004A,
+    "K": 0x004B,
+    "L": 0x004C,
+    "M": 0x004D,
+    "N": 0x004E,
+    "O": 0x004F,
+    "P": 0x0050,
+    "Q": 0x0051,
+    "R": 0x0052,
+    "S": 0x0053,
+    "T": 0x0054,
+    "U": 0x0055,
+    "V": 0x0056,
+    "W": 0x0057,
+    "X": 0x0058,
+    "Y": 0x0059,
+    "Z": 0x005A,
+    "a": 0x0061,
+    "b": 0x0062,
+    "c": 0x0063,
+    "d": 0x0064,
+    "e": 0x0065,
+    "f": 0x0066,
+    "g": 0x0067,
+    "h": 0x0068,
+    "i": 0x0069,
+    "j": 0x006A,
+    "k": 0x006B,
+    "l": 0x006C,
+    "m": 0x006D,
+    "n": 0x006E,
+    "o": 0x006F,
+    "p": 0x0070,
+    "q": 0x0071,
+    "r": 0x0072,
+    "s": 0x0073,
+    "t": 0x0074,
+    "u": 0x0075,
+    "v": 0x0076,
+    "w": 0x0077,
+    "x": 0x0078,
+    "y": 0x0079,
+    "z": 0x007A,
+    "§": 0x00A7,
+    "¨": 0x00A8,
+    "«": 0x00AB,
+    "»": 0x00BB,
+    "¼": 0x00BC,
+    "½": 0x00BD,
+    "¿": 0x00BF,
+    "À": 0x00C0,
+    "Á": 0x00C1,
+    "Â": 0x00C2,
+    "Ã": 0x00C3,
+    "Ä": 0x00C4,
+    "Å": 0x00C5,
+    "Æ": 0x00C6,
+    "Ç": 0x00C7,
+    "È": 0x00C8,
+    "É": 0x00C9,
+    "Ê": 0x00CA,
+    "Ë": 0x00CB,
+    "Ì": 0x00CC,
+    "Í": 0x00CD,
+    "Î": 0x00CE,
+    "Ï": 0x00CF,
+    "Ð": 0x00D0,
+    "Ñ": 0x00D1,
+    "Ò": 0x00D2,
+    "Ó": 0x00D3,
+    "Ô": 0x00D4,
+    "Õ": 0x00D5,
+    "Ö": 0x00D6,
+    "×": 0x00D7,
+    "Ø": 0x00D8,
+    "Ù": 0x00D9,
+    "Ú": 0x00DA,
+    "Û": 0x00DB,
+    "Ü": 0x00DC,
+    "Ý": 0x00DD,
+    "Þ": 0x00DE,
+    "à": 0x00E0,
+    "á": 0x00E1,
+    "â": 0x00E2,
+    "ã": 0x00E3,
+    "ä": 0x00E4,
+    "å": 0x00E5,
+    "æ": 0x00E6,
+    "ç": 0x00E7,
+    "è": 0x00E8,
+    "é": 0x00E9,
+    "ê": 0x00EA,
+    "ë": 0x00EB,
+    "ì": 0x00EC,
+    "í": 0x00ED,
+    "î": 0x00EE,
+    "ï": 0x00EF,
+    "ð": 0x00F0,
+    "ñ": 0x00F1,
+    "ò": 0x00F2,
+    "ó": 0x00F3,
+    "ô": 0x00F4,
+    "õ": 0x00F5,
+    "ö": 0x00F6,
+    "÷": 0x00F7,
+    "ø": 0x00F8,
+    "ù": 0x00F9,
+    "ú": 0x00FA,
+    "û": 0x00FB,
+    "ü": 0x00FC,
+    "ý": 0x00FD,
+    "þ": 0x00FE,
+    "ÿ": 0x00FF,
+    "–": 0x2013,
+    "—": 0x2014,
+    "‘": 0x2018,
+    "’": 0x2019,
+    "•": 0x2022,
+    "…": 0x2026,
+    "←": 0x2190,
+    "↑": 0x2191,
+    "→": 0x2192,
+    "↓": 0x2193,
+    "↔": 0x2194,
+    "↕": 0x2195,
+    "☺": 0x263A,
+    "☼": 0x263C,
+    "♀": 0x2640,
+    "♂": 0x2642,
+    "♥": 0x2665,
+}
+
+# ------------------------------------------------------------------
+# 2. ROWS CONFIGURATION (same as before)
+# ------------------------------------------------------------------
+
+ROWS = [
+    ("Space", [" "], 4.0),
+    ("Keyboard (1)", ["!", '"', "#", "$", "%", "&", "'", "(", ")", "*", "+", ",", "-", ".", "/"], 1.0),
+    ("Digits", ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"], 1.0),
+    ("Keyboard (2)", [":", ";", "<", "=", ">", "?", "@"], 1.0),
+    ("Uppercase", ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"], 1.0),
+    ("Keyboard (3)", ["[", "\\", "]", "^", "_", "`"], 1.0),
+    ("Lowercase", ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"], 1.0),
+    ("Keyboard (4)", ["{", "|", "}", "~"], 1.0),
+    ("ASCII+Weird", ["§", "¨", "«", "»", "¼", "½", "¿"], 1.0),
+    ("French/Spanish Upper", ["À", "Á", "Â", "Ã", "Ä", "Å", "Æ", "Ç", "È", "É", "Ê", "Ë", "Ì", "Í", "Î", "Ï", "Ð", "Ñ", "Ò", "Ó", "Ô", "Õ", "Ö", "×", "Ø", "Ù", "Ú", "Û", "Ü", "Ý", "Þ"], 1.0),
+    ("French/Spanish Lower", ["à", "á", "â", "ã", "ä", "å", "æ", "ç", "è", "é", "ê", "ë", "ì", "í", "î", "ï", "ð", "ñ", "ò", "ó", "ô", "õ", "ö", "÷", "ø", "ù", "ú", "û", "ü", "ý", "þ", "ÿ"], 1.0),
+    ("Symbols", ["–", "—", "‘", "’", "•", "…", "←", "↑", "→", "↓", "↔", "↕", "☺", "☼", "♀", "♂", "♥"], 1.0),
+]
+
+# ------------------------------------------------------------------
+# 3. GROUP MAPPING (same as before)
+# ------------------------------------------------------------------
+
+def get_group_for_char(char):
+    if char == " ":
+        return "Space"
+    elif char.isdigit():
+        return "Digits"
+    elif char.isupper():
+        return "Uppercase"
+    elif char.islower():
+        return "Lowercase"
+    elif char in ["§", "¨", "«", "»", "¼", "½", "¿"]:
+        return "ASCII+Weird"
+    elif ord(char) in range(0x00C0, 0x00FF + 1):
+        return "French/Spanish"
+    elif ord(char) in [0x2013, 0x2014, 0x2018, 0x2019, 0x2022, 0x2026, 0x2190, 0x2191, 0x2192, 0x2193, 0x2194, 0x2195, 0x263A, 0x263C, 0x2640, 0x2642, 0x2665]:
+        return "Symbols"
+    else:
+        return "Keyboard"
+
+def escape_xml_attr(value):
+    if value is None:
+        return ""
+    return (str(value)
+            .replace("&", "&amp;")
+            .replace('"', "&quot;")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+            .replace("'", "&apos;"))
+
+# ------------------------------------------------------------------
+# 4. GLYPH EXTRACTION WITH AUTO-SCALING
+# ------------------------------------------------------------------
+
+def extract_glyph_with_bounds(font, unicode_map, char, cell_w, cell_h, scale_factor=1.0):
+    """
+    Extract the glyph path and compute a transform to fit it inside the cell.
+    Returns a tuple: (path_string, transform_string, width, height)
+    """
+    code = ord(char)
+    glyph_name = unicode_map.get(code)
+    if glyph_name is None:
+        return None, None, 0, 0
+
+    glyph_set = font.getGlyphSet()
+    if glyph_name not in glyph_set:
+        return None, None, 0, 0
+
+    # Get the raw path (in font units)
+    glyph = glyph_set[glyph_name]
+    pen = SVGPathPen(glyph_set)
+    glyph.draw(pen)
+    raw_path = pen.getCommands()
+    if not raw_path:
+        # Empty glyph (like space)
+        return "", None, 0, 0
+
+    # Get bounding box from the font
+    # For TTF glyf tables: use glyph.getBounds()
+    # For CFF fonts, we may need to compute bounds from the path (fallback)
+    bounds = glyph.getBounds() if hasattr(glyph, 'getBounds') else None
+    if bounds is not None:
+        xMin, yMin, xMax, yMax = bounds
+        glyph_width = xMax - xMin
+        glyph_height = yMax - yMin
+    else:
+        # Fallback: approximate from path string (crude)
+        # For simplicity, we'll assume a standard em size of 1000 or 2048
+        # This is not ideal; we'll use the font's unitsPerEm as a fallback
+        upem = font.getHead().unitsPerEm
+        # Assume glyph covers roughly 70% of em height (typical)
+        glyph_width = upem * 0.7
+        glyph_height = upem * 0.7
+        xMin, yMin = 0, 0
+        # Note: this is a hack; better to compute bounds from path using a library
+        # But for now, we'll rely on getBounds for TTF, and for CFF we'll approximate.
+        # Since your font is OTF (CFF), we need to handle it.
+        # We'll use a simpler approach: compute the path's bounding box via a custom parser.
+        # Instead of that complexity, we'll use a uniform scaling based on cell size relative to UPEM.
+        # We'll set a fixed scale factor: cell_w / upem * 0.8 (so glyph fills ~80% of cell)
+        scale = (cell_w / upem) * 0.8
+        # We'll apply the scale to the path directly and ignore bounding box centering.
+        # This is a compromise but works for many fonts.
+        return raw_path, f"scale({scale})", cell_w, cell_h
+
+    # Calculate scale to fit inside the cell with some margin (80% of cell)
+    margin = 0.1  # 10% margin inside the cell
+    available_w = cell_w * (1 - 2 * margin)
+    available_h = cell_h * (1 - 2 * margin)
+    scale = min(available_w / glyph_width, available_h / glyph_height)
+    # Ensure we don't scale up too much (avoid clipping)
+    if scale > 1:
+        scale = 1  # Keep original size if it already fits
+
+    # Center the glyph
+    # Compute the offset so that the glyph's bounding box is centered in the cell
+    # The cell's coordinate system: origin at (0,0), width=cell_w, height=cell_h
+    # We want the glyph's bounding box to be centered.
+    cx_cell = cell_w / 2
+    cy_cell = cell_h / 2
+    cx_glyph = (xMin + xMax) / 2
+    cy_glyph = (yMin + yMax) / 2
+    # The translate should move the glyph's center to the cell's center
+    tx = cx_cell - cx_glyph * scale
+    ty = cy_cell - cy_glyph * scale
+
+    transform_str = f"translate({tx:.2f}, {ty:.2f}) scale({scale:.4f})"
+    return raw_path, transform_str, cell_w, cell_h
+
+# ------------------------------------------------------------------
+# 5. SVG GENERATOR (with scaling)
+# ------------------------------------------------------------------
+
+def generate_sprite_sheet(font_path):
+    if not os.path.exists(font_path):
+        print(f"❌ Error: File not found: {font_path}")
+        return
+
+    print(f"Loading font: {font_path}...")
+    font = TTFont(font_path)
+    cmap = font.getBestCmap()
+    unicode_map = {code: name for code, name in cmap.items()}
+    print(f"✓ Found {len(unicode_map)} Unicode mappings")
+
+    # Font units per em (used for fallback scaling)
+    upem = font.getHead().unitsPerEm
+    print(f"✓ Font UPEM: {upem}")
+
+    # Base cell dimensions (1×)
+    BASE_CELL_W = 18
+    BASE_CELL_H = 39
+    PAD_RIGHT = 12
+    PAD_BOTTOM = 16
+    ROW_PAD_LEFT = 20
+    ROW_PAD_TOP = 20
+
+    def cell_dimensions(scale):
+        return (int(BASE_CELL_W * scale), int(BASE_CELL_H * scale))
+
+    # Extract all glyphs with scaling
+    glyphs_data = {}
+    for char, code in CHARACTER_SET.items():
+        # Determine which scale factor applies to this character (from ROWS)
+        cell_scale = 1.0
+        for _, chars, s in ROWS:
+            if char in chars:
+                cell_scale = s
+                break
+        cell_w, cell_h = cell_dimensions(cell_scale)
+
+        path, transform, _, _ = extract_glyph_with_bounds(font, unicode_map, char, cell_w, cell_h)
+        if path is not None:
+            glyphs_data[char] = {
+                "char": char,
+                "code": code,
+                "path": path,
+                "transform": transform,
+                "group": get_group_for_char(char),
+                "cell_w": cell_w,
+                "cell_h": cell_h,
+            }
+        else:
+            print(f"⚠️ Skipping '{char}' (U+{code:04X}) - not found in font")
+
+    if not glyphs_data:
+        print("❌ No glyphs extracted!")
+        return
+
+    print(f"✓ Extracted {len(glyphs_data)} glyphs")
+
+    # Build rows
+    built_rows = []
+    for group_name, chars, scale in ROWS:
+        filtered = [c for c in chars if c in glyphs_data]
+        if filtered:
+            built_rows.append((group_name, filtered, scale))
+        else:
+            print(f"⚠️ Warning: Row '{group_name}' has no characters")
+
+    if not built_rows:
+        print("❌ No rows with characters found!")
+        return
+
+    # Calculate canvas size
+    max_width = 0
+    for _, chars, scale in built_rows:
+        cell_w, _ = cell_dimensions(scale)
+        w = ROW_PAD_LEFT + len(chars) * (cell_w + PAD_RIGHT)
+        if w > max_width:
+            max_width = w
+
+    total_height = ROW_PAD_TOP
+    for _, _, scale in built_rows:
+        _, cell_h = cell_dimensions(scale)
+        total_height += cell_h + PAD_BOTTOM
+
+    print(f"Canvas: {max_width}×{total_height}")
+    print(f"Rows: {len(built_rows)}")
+
+    # Build SVG
+    output = []
+    output.append(f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {max_width} {total_height}" width="{max_width}" height="{total_height}">')
+    output.append('  <style>')
+    output.append('    :root { --bg-color: #ffffff; --glyph-color: #000000; }')
+    output.append('    svg { background: var(--bg-color); }')
+    output.append('    .glyph-on { fill: var(--glyph-color); }')
+    output.append('  </style>')
+
+    output.append('  <defs>')
+    for char, data in glyphs_data.items():
+        code = data["code"]
+        path = data["path"]
+        group = data["group"]
+        transform = data["transform"]
+        escaped_char = escape_xml_attr(char)
+        escaped_group = escape_xml_attr(group)
+        escaped_path = escape_xml_attr(path)
+
+        output.append(f'    <!-- Glyph: "{escaped_char}" (U+{code:04X}) -->')
+        output.append(f'    <g id="canada-{code}" data-index="{code}" data-group="{escaped_group}" data-name="{escaped_char}">')
+        if path and transform:
+            # Apply both translation and scaling
+            output.append(f'      <g transform="{transform}">')
+            output.append(f'        <path d="{escaped_path}" class="glyph-on"/>')
+            output.append('      </g>')
+        elif path:
+            # No transform needed (should not happen)
+            output.append(f'      <path d="{escaped_path}" class="glyph-on"/>')
+        output.append('    </g>')
+    output.append('  </defs>')
+
+    # Layout
+    output.append('  <!-- Sprite Sheet Layout: Row-based grouping -->')
+    current_y = ROW_PAD_TOP
+    for group_name, chars, scale in built_rows:
+        output.append(f'  <!-- ========== ROW: {escape_xml_attr(group_name)} ({len(chars)} chars) scale:{scale} ========== -->')
+        row_id = f"row-{group_name.replace(' ', '-').replace('(', '').replace(')', '')}"
+        output.append(f'  <g id="{row_id}" data-row="{escape_xml_attr(group_name)}" transform="translate(0, {current_y})">')
+        current_x = ROW_PAD_LEFT
+        cell_w, cell_h = cell_dimensions(scale)
+        for char in chars:
+            if char in glyphs_data:
+                code = glyphs_data[char]["code"]
+                escaped_char = escape_xml_attr(char)
+                output.append(f'    <use href="#canada-{code}" x="{current_x}" /> <!-- canada-{code} ({escape_xml_attr(group_name)} | {escaped_char}) -->')
+            else:
+                output.append(f'    <rect x="{current_x}" y="0" width="{cell_w}" height="{cell_h}" fill="none" stroke="#cccccc" stroke-width="0.5" /> <!-- MISSING: {char} -->')
+            current_x += cell_w + PAD_RIGHT
+        output.append('  </g>')
+        current_y += cell_h + PAD_BOTTOM
+
+    output.append('</svg>')
+
+    with open("canada_sprite.svg", "w", encoding="utf-8") as f:
+        f.write("\n".join(output))
+
+    print(f"\n[SUCCESS] Generated Canada sprite sheet: canada_sprite.svg")
+    print(f"  Rows: {len(built_rows)}")
+    print(f"  Total glyphs: {len(glyphs_data)}")
+    print(f"  Canvas: {max_width}×{total_height}")
+    print(f"  Cell size: {BASE_CELL_W}×{BASE_CELL_H} (1×)")
+
+# ------------------------------------------------------------------
+# 6. MAIN
+# ------------------------------------------------------------------
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Usage: python3 canada-generator.py <font.otf|ttf>")
+        sys.exit(1)
+    font_path = sys.argv[1]
+    generate_sprite_sheet(font_path)
