@@ -102,8 +102,6 @@ def escape_xml_attr(value):
     if value is None: return ""
     return str(value).replace("&", "&amp;").replace('"', "&quot;").replace("<", "&lt;").replace(">", "&gt;").replace("'", "&apos;")
 
-
-
 def extract_glyph_with_bounds(font, unicode_map, char, cell_w, cell_h):
     # Safety Interceptor: Automatically resolve multi-character escaping artifacts
     if len(char) > 1: 
@@ -141,45 +139,15 @@ def extract_glyph_with_bounds(font, unicode_map, char, cell_w, cell_h):
     # Map the typeface internal Em coordinate framework directly onto our 48px baseline sandbox boundary
     scale = active_canvas_h / upem
 
-    # Anchor typographic origin (0,0) exactly at X=18 (margin cushion) and Y=48
+    # Anchor typographic origin (0,0) exactly at X=18 (margin cushion) and Y=18
+    # This pulls the alternative glyph vectors cleanly up to the top-left ceiling of the modules
     tx = 18.0
-    ty = 48.0
+    ty = 18.0
 
     # Clean inversion matrix rotates the bottom-to-top font layout into top-to-bottom SVG coordinates
     transform = f"translate({tx:.2f}, {ty:.2f}) scale({scale:.4f}, {-scale:.4f})"
     
     return raw_path, transform, cell_w, cell_h, glyph_name
-
-
-    active_box_w, active_box_h = 48, 48
-    if bounds is not None:
-        xMin, yMin, xMax, yMax = bounds
-        glyph_w, glyph_h = xMax - xMin, yMax - yMin
-        if glyph_w <= 0 or glyph_h <= 0: return raw_path, None, cell_w, cell_h, glyph_name
-        margin = 0.05
-        scale = min((active_box_w * (1 - 2 * margin)) / glyph_w, (active_box_h * (1 - 2 * margin)) / glyph_h)
-        if scale > 1.0: scale = 1.0
-        tx = ((cell_w - glyph_w * scale) / 2) - xMin * scale
-        ty = ((cell_h - 12 - glyph_h * scale) / 2) + yMax * scale + 6
-        return raw_path, f"translate({tx:.2f}, {ty:.2f}) scale({scale:.4f}, {-scale:.4f})", cell_w, cell_h, glyph_name
-    
-        # === PIPELINE-SAFE LEFT-JUSTIFIED EXTRACTION ===
-        upem = font['head'].unitsPerEm
-        active_canvas_h = 48   # Target drawing height for ascender limits
-    
-        # Scale factor maps the font's internal Em square directly to our 48px baseline box
-        scale = active_canvas_h / upem
-    
-        # Anchor the typographic origin (0,0) exactly at X=18 (for margin buffer) and Y=48
-        tx = 18.0
-        ty = 48.0
-    
-        # Invert the font's native bottom-to-top Y-axis into standard SVG top-to-bottom space
-        transform = f"translate({tx:.2f}, {ty:.2f}) scale({scale:.4f}, {-scale:.4f})"
-        return raw_path, transform, cell_w, cell_h, glyph_name
-
-
-
 
 
 def generate_sprite_sheet(font_path):
