@@ -104,7 +104,6 @@ def escape_xml_attr(value):
 
 
 
-
 def extract_glyph_with_bounds(font, unicode_map, char, cell_w, cell_h):
     # Safety Interceptor: Automatically resolve multi-character escaping artifacts
     if len(char) > 1: 
@@ -150,6 +149,7 @@ def extract_glyph_with_bounds(font, unicode_map, char, cell_w, cell_h):
     transform = f"translate({tx:.2f}, {ty:.2f}) scale({scale:.4f}, {-scale:.4f})"
     
     return raw_path, transform, cell_w, cell_h, glyph_name
+
 
     active_box_w, active_box_h = 48, 48
     if bounds is not None:
@@ -198,12 +198,21 @@ def generate_sprite_sheet(font_path):
     ROW_PAD_LEFT = 72      # Master canvas outer perimeter frame left offset margin
     ROW_PAD_TOP = 108      # Master canvas outer perimeter frame top offset margin
 
-    
+  
     glyphs_data = {}
     for char, code in CHARACTER_SET.items():
         path, transform, _, _, glyph_name = extract_glyph_with_bounds(font, unicode_map, char, BASE_CELL_W, BASE_CELL_H)
+
+        # CRITICAL SAFETY HOOK: If path is None, skip this char entirely
         if path is not None:
-            glyphs_data[char] = {"char": char, "code": code, "path": path, "transform": transform, "group": get_group_for_char(char), "glyph_name": glyph_name}
+            glyphs_data[char] = {
+                "char": char,
+                "code": code,
+                "path": path,
+                "transform": transform,
+                "group": get_group_for_char(char),
+                "glyph_name": glyph_name
+            }
 
     built_rows = []
     for group_name, chars in ROWS:
