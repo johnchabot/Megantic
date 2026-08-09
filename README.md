@@ -2,8 +2,11 @@
 
 Hybrid typographic compilation pipeline low-level software engineering project
 
-* cross-format font converter, transcompiler across eras in computer graphics: the deterministic, pixel-locked world of legacy hardware and the continuous coordinate spaces of modern vector engines.
-* Recompile extracted vector glyph curves into standard structural parameters.
+**Thing A** <font color="#FF0000">*</font> **cross-format font converter, transcompiler across eras in computer graphics: the deterministic, pixel-locked world of legacy hardware and the continuous coordinate spaces of modern vector engines.**
+**Thing A** <font color="#FF0000">*</font> **Recompile extracted vector glyph curves into standard structural parameters.**
+**Thing A** <font color="#FF0000">*</font> **Classic Rasterization, Extraction, and Compression (RLE) Pipeline.**
+ 
+* 
 * Classic Rasterization, Extraction, and Compression (RLE) Pipeline.*
 
 # Here is how that look stacks up from a high-level engineering view:  
