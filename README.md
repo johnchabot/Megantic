@@ -1,6 +1,7 @@
 # Megantic Text Generator
 
-1. Megantic  
+1. Megantic
+- segment-based vector font system where each glyph is constructed from a 45‑bit "recipe" of geometric shards
 - 45-Segment Structural Expressivist Addressable Display matrix  
 - Pan-Latin Heavy Transit Matrix  
   
