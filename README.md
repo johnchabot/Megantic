@@ -1,4 +1,6 @@
-# Megantic Text Generator
+# The Megantic Text Generator
+
+highly systematic asset compiler. It directly extracts vector glyph curves out of font binaries and spaces them along row paths using standard structural parameters.
 
 1. Megantic
 - segment-based vector font system where each glyph is constructed from a 45‑bit "recipe" of geometric shards
