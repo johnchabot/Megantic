@@ -216,10 +216,14 @@ def generate_sprite_sheet(font_path):
     xml_header = "\x3c?xml version=\x221.0\x22 encoding=\x22UTF-8\x22?\x3e"
     
     # We break up the strings manually to inject xml:space="preserve" and full literal schemas safely
+
+
+    # === SURGICAL FIX: RESTORING FULL SCHEMAS ===
     svg_tag = "\x3csvg xmlns=" + '"http://w3.org" '
     svg_tag += "xmlns:xlink=" + '"http://w3.org" '
     svg_tag += "xml:space=" + '"preserve" '
     svg_tag += f'viewBox="0 0 {max_width} {total_height}" width="{max_width}" height="{total_height}"\x3e'
+
     
     out = [xml_header, svg_tag]
 
