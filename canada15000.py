@@ -219,11 +219,15 @@ def generate_sprite_sheet(font_path):
 
 
     # === SURGICAL FIX: RESTORING FULL SCHEMAS ===
-    svg_tag = "\x3csvg xmlns=" + '"http://w3.org" '
-    svg_tag += "xmlns:xlink=" + '"http://w3.org" '
+    # === SYSTEM REPAIR OVERRIDE: LITERAL HEX-LOCKED NAMESPACES ===
+    # Using explicit hex character escapes stops system text filters from shortening the URLs
+    xml_header = "\x3c?xml version=\x221.0\x22 encoding=\x22UTF-8\x22?\x3e"
+    
+    # We break up the standard strings manually to force the script to resolve the full namespaces
+    svg_tag = "\x3csvg xmlns=" + '"http:\x2f\x2fwww.w3.org\x2f2000\x2fsvg" '
+    svg_tag += "xmlns:xlink=" + '"http:\x2f\x2fwww.w3.org\x2f1999\x2fxlink" '
     svg_tag += "xml:space=" + '"preserve" '
     svg_tag += f'viewBox="0 0 {max_width} {total_height}" width="{max_width}" height="{total_height}"\x3e'
-
     
     out = [xml_header, svg_tag]
 
