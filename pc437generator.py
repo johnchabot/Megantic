@@ -389,6 +389,14 @@ for idx, (name, desc) in enumerate(greek_math_names, start=224):
 # 255 (NBSP)
 CHAR_META[255] = ("Extended and International Characters", "255", "NBSP", "Invisible. Used for sneaky filenames that look blank.")
 
+# Check for missing metadata
+missing = []
+for i in range(256):
+    if i not in CHAR_META:
+        missing.append(i)
+if missing:
+    print(f"Missing metadata for characters: {missing}")
+
 
 # ======================================================================
 # 3. PATH GENERATOR (Run-Length Encoding)
