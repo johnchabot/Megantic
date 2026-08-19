@@ -331,6 +331,20 @@ line_names = [
     ("LEFT-HALF-BLOCK", "Left half block."),
     ("RIGHT-HALF-BLOCK", "Right half block."),
     ("UPPER-HALF-BLOCK", "Upper half block."),
+    # --- Missing 211–223 ---
+    ("BOX-DRAWING-211", "Box drawing character 211."),
+    ("BOX-DRAWING-212", "Box drawing character 212."),
+    ("BOX-DRAWING-213", "Box drawing character 213."),
+    ("BOX-DRAWING-214", "Box drawing character 214."),
+    ("BOX-DRAWING-215", "Box drawing character 215."),
+    ("BOX-DRAWING-216", "Box drawing character 216."),
+    ("BOX-DRAWING-217", "Box drawing character 217."),
+    ("BOX-DRAWING-218", "Box drawing character 218."),
+    ("BOX-DRAWING-219", "Box drawing character 219."),
+    ("BOX-DRAWING-220", "Box drawing character 220."),
+    ("BOX-DRAWING-221", "Box drawing character 221."),
+    ("BOX-DRAWING-222", "Box drawing character 222."),
+    ("BOX-DRAWING-223", "Box drawing character 223."),
 ]
 for idx, (name, desc) in enumerate(line_names, start=166):
     CHAR_META[idx] = ("Extended and International Characters", "166–223", name, desc)
