@@ -403,34 +403,24 @@ if missing:
 # ======================================================================
 
 def generate_path_for_glyph(font_data, char_idx, scale=4):
-    """
-    Returns a string containing the SVG path 'd' attribute for the glyph.
-    Uses run-length encoding: M x,y h width for each run of lit pixels.
-    The 9th column is duplicated from the 8th (VGA behavior).
-    """
     commands = []
     for row in range(16):
         byte = font_data[char_idx * 16 + row]
-        # Build 9-bit row: bits 0..7 (LSB = leftmost) + duplicate bit 7
         bits = []
-        for col in range(8):
+        # Read bits from MSB (leftmost) to LSB (rightmost)
+        for col in range(7, -1, -1):
             bits.append(1 if (byte & (1 << col)) else 0)
-        bits.append(bits[7])  # duplicate the 8th column
+        bits.append(bits[7])  # duplicate the 8th column (now the rightmost)
 
-        # Scan for runs of 1s
         x = 0
         while x < 9:
             if bits[x] == 1:
                 start_x = x
                 while x < 9 and bits[x] == 1:
                     x += 1
-                # Emit: M{start_x*scale},{row*scale} h{(x-start_x)*scale}
                 commands.append(f"M{start_x * scale},{row * scale}h{(x - start_x) * scale}")
             else:
                 x += 1
-    if not commands:
-        # Empty glyph (shouldn't happen, but just in case)
-        return ""
     return " ".join(commands)
 
 
